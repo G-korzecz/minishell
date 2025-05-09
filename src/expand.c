@@ -12,6 +12,18 @@
 
 #include "../inc/minishell.h"
 
+static char	*prepare_for_expansion(char *str)
+{
+	char	*tmp;
+
+	if (!str || !ft_strchr(str, '$'))
+		return (str);
+	tmp = str;
+	str = ft_strjoin(str, "\"\"");
+	free(tmp);
+	return (str);
+}
+
 /*Helper function of expand vars, which finds the end_index 
 of a variable i.e. $VAR.. then end_index is  where "." is.
 Curly brackets are handled here by setting the start to after the beginning {
@@ -96,6 +108,7 @@ char	*var_expander(char *str, int quotes[2], t_cmd_set *p)
 	int		i;
 
 	i = -1;
+	str = prepare_for_expansion(str);
 	while (str && str[++i] && i < (int)ft_strlen(str))
 	{
 		quotes[0] = (quotes[0] + (!quotes[1] && str[i] == '\'')) % 2;
