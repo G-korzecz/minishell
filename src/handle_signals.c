@@ -19,6 +19,7 @@ calls signals_parent to set parent signals
 SIGQUIT (ctlr + \ ) will be ignored (SIG_IGN)
 checks if there was a signal status code before,
 then set p->status_code to this signal status code */
+
 void	set_signals(t_cmd_set *p)
 {
 	signal(SIGINT, signals_parent);
@@ -26,10 +27,7 @@ void	set_signals(t_cmd_set *p)
 	if (p->status_code < 0)
 		p->status_code = 0;
 	if (g_exit_status >= 0)
-	{
 		p->status_code = g_exit_status;
-		g_exit_status = -1;
-	}
 }
 
 /* Sets signals for the program (parent process). */

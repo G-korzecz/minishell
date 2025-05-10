@@ -15,7 +15,7 @@
 /*If the cmd was internal (cd,unset,export,exit) runs builtin function.
 If there are child processes waits for all to finish.
 Then gets status from the child process and sets the p->status_code. */
-void	exec_cmd_and_wait(t_cmd_set *p, int status)
+/*void	exec_cmd_and_wait(t_cmd_set *p, int status)
 {
 	t_list	*cmd;
 
@@ -40,6 +40,33 @@ void	exec_cmd_and_wait(t_cmd_set *p, int status)
 	else if (WIFSIGNALED(status) && status != 13)
 		p->status_code = 128 + WTERMSIG(status);
 	p->status_code = p->status_code & 255;
+}*/
+
+void	exec_cmd_and_wait(t_cmd_set *p, int status)
+{
+	t_list	*cmd;
+
+	cmd = p->cmds;
+	signal(SIGINT, SIG_IGN);
+	signal(SIGQUIT, SIG_IGN);
+	while (cmd)
+	{
+		setup_command_pipe(p, cmd);
+		cmd = cmd->next;
+	}
+	if (p && p->pid_of_lst_cmd != 0)
+	{
+		waitpid(p->pid_of_lst_cmd, &status, 0);
+		p->pid_of_lst_cmd = 0;
+		if (WIFSIGNALED(status))
+			signals_child(WTERMSIG(status));
+		if (WIFEXITED(status))
+			p->status_code = WEXITSTATUS(status);
+		else if (WIFSIGNALED(status) && status != 13)
+			p->status_code = 128 + WTERMSIG(status);
+		p->status_code &= 255;
+	}
+	g_exit_status = p->status_code;
 }
 
 /* Duplicates file descriptors, if in_fd is specified -> to stdin.

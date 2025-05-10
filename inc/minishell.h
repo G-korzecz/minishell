@@ -28,7 +28,8 @@
 # include <stdbool.h>
 # include <errno.h>
 
-/* return code of signal Ctrl+C Ctrl+\ Ctrl+D */
+/* Used to store the exit status of last command used
+Also used with CTRL + D | CTRL + C | CTRL + / */
 extern int	g_exit_status;
 
 /* struct which are saved in the content of a linked list for each command
