@@ -47,17 +47,15 @@ Exits with:
 - 127 if command not found or ENOENT,
 - 126 if permission denied or it's a directory,
 - 1 for all other errors. */
-void	run_execve(t_cmd_set *p, t_cmd *n)
+void	run_execve(t_cmd_set *p, t_cmd *n, t_list *cmd)
 {
 	signal(SIGINT, signals_child);
 	signal(SIGQUIT, signals_child);
-	if (!n->cmd_path)
-		exit(127);
-	execve(n->cmd_path, n->args, p->envp);
-	if (errno == ENOENT)
-		exit(127);
-	else if (errno == EACCES || errno == EISDIR)
-		exit(126);
-	else
-		exit(1);
+	p->status_code = 0;
+	if (!is_builtin(n) && n->args)
+		execve(n->cmd_path, n->args, p->envp);
+	else if (is_builtin(n))
+		p->status_code = exec_builtin_child(p, n, cmd);
+	if (cmd->next)
+		p->status_code = 0;
 }

@@ -71,7 +71,7 @@ static void	process_checks(t_list *cmd, char *path, t_cmd_set *p, char ***s)
 	t_cmd	*n;
 
 	n = cmd->content;
-	if (n->args && !ft_strchr("/.~", n->args[0][0]))
+	if (!is_builtin(n) && n->args && !ft_strchr("/.~", n->args[0][0]))
 	{
 		*s = ft_split(path, ':');
 		n->cmd_path = find_command(*s, *n->args, n->cmd_path);
@@ -120,16 +120,16 @@ void	find_cmd_path(t_cmd_set *p, t_list *cmd, char **s, char *path)
 	if (!path || !*path)
 		path = ft_strdup("/");
 	dir = cmd_checks(cmd, &s, path, p);
-	if (n && n->args && dir && (n->args[0][0]
+	if (!is_builtin(n) && n && n->args && dir && (n->args[0][0]
 		&& !ft_strchr("/.~", n->args[0][0])))
 		put_err(NULL, "command not found", 127, p);
-	else if (n && n->args && dir && n->args[0][0]
+	else if (!is_builtin(n) && n && n->args && dir && n->args[0][0]
 			&& (ft_strchr("/.~", n->args[0][0])))
 		put_err("Is_Directory", *n->args, 126, p);
-	else if (n && n->cmd_path
+	else if (!is_builtin(n) && n && n->cmd_path
 		&& access(n->cmd_path, F_OK) == -1)
 		put_err("NoFile_NoDir", n->cmd_path, 127, p);
-	else if (n && n->cmd_path
+	else if (!is_builtin(n) && n && n->cmd_path
 		&& access(n->cmd_path, X_OK) == -1)
 		put_err("Perm_Denied", n->cmd_path, 126, p);
 	if (dir)

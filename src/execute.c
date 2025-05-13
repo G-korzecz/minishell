@@ -15,33 +15,6 @@
 /*If the cmd was internal (cd,unset,export,exit) runs builtin function.
 If there are child processes waits for all to finish.
 Then gets status from the child process and sets the p->status_code. */
-/*void	exec_cmd_and_wait(t_cmd_set *p, int status)
-{
-	t_list	*cmd;
-
-	cmd = p->cmds;
-	signal(SIGINT, SIG_IGN);
-	signal(SIGQUIT, SIG_IGN);
-	while (cmd)
-	{
-		setup_command_pipe(p, cmd);
-		cmd = cmd->next;
-	}
-	if (p && p->pid_of_lst_cmd != 0)
-	{
-		waitpid(p->pid_of_lst_cmd, &status, 0);
-		p->pid_of_lst_cmd = 0;
-	}
-	waitpid(-1, NULL, 0);
-	if (WIFSIGNALED(status))
-		signals_child(WTERMSIG(status));
-	if (WIFEXITED(status))
-		p->status_code = WEXITSTATUS(status);
-	else if (WIFSIGNALED(status) && status != 13)
-		p->status_code = 128 + WTERMSIG(status);
-	p->status_code = p->status_code & 255;
-}*/
-
 void	exec_cmd_and_wait(t_cmd_set *p, int status)
 {
 	t_list	*cmd;
@@ -103,23 +76,18 @@ Runs external cmd or internal (pwd,echo,env) in child process. */
 void	*exec_in_child(t_cmd_set *p, t_list *cmd, int fd[2])
 {
 	t_cmd	*n;
-	int		l;
 
 	n = cmd->content;
-	l = 0;
-	if (n->args)
-		l = ft_strlen(*n->args);
 	dup_io_fds(cmd, fd);
 	close(fd[0]);
-	run_execve(p, n);
+	run_execve(p, n, cmd);
 	if (cmd->next != NULL)
 		p->status_code = 0;
-	l = p->status_code;
 	if (p && p->cmds)
 		ft_lstclear(&p->cmds, free_lst);
 	if (p && p->envp)
 		free_array(&p->envp);
-	exit(l);
+	exit(p->status_code);
 }
 
 /* Creates child process, call func to run the cmd in child process. */
@@ -159,11 +127,12 @@ void	*chk_perm_call_child(t_cmd_set *p, t_list *cmd, int fd[2])
 		dir = opendir(*n->args);
 	if (n->in_fd == -1 || n->out_fd == -1)
 		return (NULL);
-	if (n->cmd_path && access(n->cmd_path, X_OK) == 0)
+	if ((n->cmd_path && access(n->cmd_path, X_OK) == 0) || is_builtin(n))
 		create_fork(p, cmd, fd);
-	else if ((n->cmd_path && access(n->cmd_path, F_OK) == 0) || dir)
+	else if (!is_builtin(n) && ((n->cmd_path && !access(n->cmd_path, F_OK))
+			|| dir))
 		p->status_code = 126;
-	else if (n->args)
+	else if (!is_builtin(n) && n->args)
 		p->status_code = 127;
 	if (dir)
 		closedir(dir);

@@ -73,7 +73,6 @@ int		ft_strchr_idx(const char *s, int c);
 char	**ft_dup_array(char **m);
 char	**ft_array_insert(char **in, char *newstr);
 void	free_array(char ***m);
-void	ft_printarray(char **m);
 char	**ft_array_replace(char ***big, char **small, int n);
 char	**split_and_ignore_space_if_in_quote(char *s, char *set);
 char	*remove_quotes(char const *s1, int squote, int dquote);
@@ -109,8 +108,16 @@ void	handle_env_vars(char *str, int *i, int fd[2], t_cmd_set *p);
 void	free_lst(void *content);
 void	free_all(char *s1, char *s2, char *s3, char *s4);
 void	exec_cmd_and_wait(t_cmd_set *p, int status);
-void	run_execve(t_cmd_set *p, t_cmd *n);
+void	run_execve(t_cmd_set *p, t_cmd *n, t_list *cmd);
 t_cmd	*init_cmd(void);
 void	*setup_command_pipe(t_cmd_set *p, t_list *cmd);
+
+/* Builtins */
+
+int		is_builtin(t_cmd *n);
+int		exec_builtin_child(t_cmd_set *p, t_cmd *n, t_list *cmd);
+int		builtin_echo(t_list *cmd);
+int		builtin_env(char **envp);
+int		builtin_pwd(void);
 
 #endif

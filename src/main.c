@@ -63,7 +63,7 @@ static void	handle_non_interactive_input(t_cmd_set *p)
 	line = p->input_text;
 	p->input_text = ft_strtrim(p->input_text, "\n");
 	if (p->input_text == NULL)
-		free_exit(p, g_exit_status, "exit");
+		free_exit(p, g_exit_status, "exit\n");
 	free_all(line, NULL, NULL, NULL);
 }
 
