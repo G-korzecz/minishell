@@ -27,13 +27,13 @@ int	handle_parent_builtins(t_cmd_set *p, t_list *cmd, int *is_exit, int n)
 		if (a)
 			n = ft_strlen(*a);
 		if (a && !ft_strncmp(*a, "exit", n) && n == 4 && list_size == 1)
-			ft_exit(cmd, is_exit, p);
+			builtin_exit(cmd, is_exit, p);
 		else if (list_size == 1 && !cmd->next && a && !ft_strncmp(*a, "cd", n) && n == 2)
-			status_code = ft_cd(p, a);
+			status_code = builtin_cd();
 		else if (list_size == 1 && !cmd->next && a && !ft_strncmp(*a, "export", n) && n == 6)
-			status_code = ft_export(p, a);
+			status_code = builtin_export();
 		else if (list_size == 1 && !cmd->next && a && !ft_strncmp(*a, "unset", n) && n == 5)
-			status_code = ft_unset(p, a);
+			status_code = builtin_unset();
 		else
 			setup_command_pipe(p, cmd);
 		if (cmd->next)

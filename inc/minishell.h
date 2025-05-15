@@ -79,6 +79,7 @@ char	*remove_quotes(char const *s1, int squote, int dquote);
 char	*var_expander(char *str, int quotes[2], t_cmd_set *p);
 char	*ft_getenv(char *var, char **envp);
 char	**ft_setenv(char *var, char *value, char **envp);
+int		find_env_var_index(char *var, char **envp);
 t_list	*free_tmp_lst(t_list *cmds, char **args, char **temp);
 
 /* Free and exit */
@@ -121,10 +122,9 @@ int		builtin_env(char **envp);
 int		builtin_pwd(void);
 int		handle_parent_builtins(t_cmd_set *p, t_list *cmd, int *is_exit, int n);
 
-void	ft_exit(t_list *cmd, int *is_exit, t_cmd_set *p);
-int		ft_unset(t_cmd_set *p, char **args);
-int		ft_cd(t_cmd_set *p, char **cmd_args);
-int		ft_export(t_cmd_set *p, char **args);
-int		find_env_var_index(char *var, char **envp);
+void	builtin_exit(t_list *cmd, int *is_exit, t_cmd_set *p);
+int		builtin_unset(void);
+int		builtin_cd(void);
+int		builtin_export(void);
 
 #endif
