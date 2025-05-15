@@ -107,7 +107,7 @@ t_cmd	*in_fd_heredoc(t_cmd *node, char **args, int *i, t_cmd_set *p);
 void	handle_env_vars(char *str, int *i, int fd[2], t_cmd_set *p);
 void	free_lst(void *content);
 void	free_all(char *s1, char *s2, char *s3, char *s4);
-void	exec_cmd_and_wait(t_cmd_set *p, int status);
+void	exec_cmd_and_wait(t_cmd_set *p, int status, int tmp[2], int *is_exit);
 void	run_execve(t_cmd_set *p, t_cmd *n, t_list *cmd);
 t_cmd	*init_cmd(void);
 void	*setup_command_pipe(t_cmd_set *p, t_list *cmd);
@@ -119,5 +119,12 @@ int		exec_builtin_child(t_cmd_set *p, t_cmd *n, t_list *cmd);
 int		builtin_echo(t_list *cmd);
 int		builtin_env(char **envp);
 int		builtin_pwd(void);
+int		handle_parent_builtins(t_cmd_set *p, t_list *cmd, int *is_exit, int n);
+
+void	ft_exit(t_list *cmd, int *is_exit, t_cmd_set *p);
+int		ft_unset(t_cmd_set *p, char **args);
+int		ft_cd(t_cmd_set *p, char **cmd_args);
+int		ft_export(t_cmd_set *p, char **args);
+int		find_env_var_index(char *var, char **envp);
 
 #endif

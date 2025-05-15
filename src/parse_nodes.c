@@ -123,15 +123,16 @@ static t_list	*parse_cmds(char **args, int i, t_cmd_set *p)
 	return (cmds[0]);
 }
 
-/* Parses and executes the given arguments.
-Uses parse_cmds to build the command list.
-Sets the $_ variable and calls exec_cmd_and_wait.
-Returns the original pointer after execution. */
 void	*parse_nodes(char **args, t_cmd_set *p)
 {
+	int	is_exit;
 	int	status;
+	int	tmp[2];
 
+	is_exit = 0;
 	status = 0;
+	tmp[0] = -1;
+	tmp[1] = -1;
 	p->cmds = parse_cmds(split_with_special_chars(args), -1, p);
 	if (!p->cmds)
 		return (p);
@@ -139,6 +140,13 @@ void	*parse_nodes(char **args, t_cmd_set *p)
 		&& ft_arr_len(((t_cmd *)(p->cmds->content))->args))
 		ft_setenv("_", ((t_cmd *)(p->cmds->content))->args[ft_arr_len(((t_cmd *)
 					(p->cmds->content))->args) - 1], p->envp);
-	exec_cmd_and_wait(p, status);
+	exec_cmd_and_wait(p, status, tmp, &is_exit);
+	if (is_exit)
+		free_exit(p, p->status_code, NULL);
+	if (p->cmds && is_exit)
+	{
+		ft_lstclear(&p->cmds, free_lst);
+		return (NULL);
+	}
 	return (p);
 }

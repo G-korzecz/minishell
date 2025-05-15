@@ -12,34 +12,33 @@
 
 #include "../inc/minishell.h"
 
-/*If the cmd was internal (cd,unset,export,exit) runs builtin function.
-If there are child processes waits for all to finish.
-Then gets status from the child process and sets the p->status_code. */
-void	exec_cmd_and_wait(t_cmd_set *p, int status)
+void	exec_cmd_and_wait(t_cmd_set *p, int status, int tmp[2], int *is_exit)
 {
-	t_list	*cmd;
-
-	cmd = p->cmds;
+	tmp[1] = handle_parent_builtins(p, p->cmds, is_exit, 0);
+	if (ft_lstsize(p->cmds) == 1)
+		p->status_code = tmp[1];
 	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_IGN);
-	while (cmd)
-	{
-		setup_command_pipe(p, cmd);
-		cmd = cmd->next;
-	}
 	if (p && p->pid_of_lst_cmd != 0)
 	{
 		waitpid(p->pid_of_lst_cmd, &status, 0);
 		p->pid_of_lst_cmd = 0;
-		if (WIFSIGNALED(status))
-			signals_child(WTERMSIG(status));
-		if (WIFEXITED(status))
-			p->status_code = WEXITSTATUS(status);
-		else if (WIFSIGNALED(status) && status != 13)
-			p->status_code = 128 + WTERMSIG(status);
-		p->status_code &= 255;
 	}
-	g_exit_status = p->status_code;
+	waitpid(-1, NULL, 0);
+	if (WIFSIGNALED(status))
+		signals_child(WTERMSIG(status));
+	if (WIFEXITED(status))
+	{
+		if (WEXITSTATUS(status) == 127 && !tmp[1])
+			p->status_code = WEXITSTATUS(status);
+		else if (!tmp[1])
+			p->status_code = WEXITSTATUS(status);
+		else if (status && WEXITSTATUS(status))
+			p->status_code = WEXITSTATUS(status);
+	}
+	else if (WIFSIGNALED(status) && status != 13)
+		p->status_code = 128 + WTERMSIG(status);
+	p->status_code = p->status_code & 255;
 }
 
 /* Duplicates file descriptors, if in_fd is specified -> to stdin.

@@ -28,6 +28,14 @@ int	is_builtin(t_cmd *n)
 		return (1);
 	if (!ft_strncmp(*n->args, "echo", len) && len == 4)
 		return (1);
+	if (!ft_strncmp(*n->args, "cd", len) && len == 2)
+		return (1);
+	if (!ft_strncmp(*n->args, "export", len) && len == 6)
+		return (1);
+	if (!ft_strncmp(*n->args, "unset", len) && len == 5)
+		return (1);
+	if (!ft_strncmp(*n->args, "exit", len) && len == 4)
+		return (1);
 	return (0);
 }
 
