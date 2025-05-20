@@ -5,16 +5,13 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: gkorzecz <gkorzec@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/29 14:29:43 by gkorzecz          #+#    #+#             */
-/*   Updated: 2025/04/29 14:38:02 by gkorzecz         ###   ########.fr       */
+/*   Created: 2025/05/17 16:08:28 by gkorzecz          #+#    #+#             */
+/*   Updated: 2025/05/17 16:08:55 by gkorzecz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/minishell.h"
 
-/* If envp is empty (e.g. when using `env -i`), fills envp manually.
-Adds default values like PATH, HOME, PWD, OLDPWD, SHLVL, and _.
-Returns 1 on success, 0 on memory allocation failure. */
 static int	allocate_env_vars_if_envp_empty(t_cmd_set *p)
 {
 	size_t	i;
@@ -37,9 +34,6 @@ static int	allocate_env_vars_if_envp_empty(t_cmd_set *p)
 	return (1);
 }
 
-/* Initializes fields in the t_cmd_set struct to default values.
-If envp is empty or NULL, allocates default environment using fallback values.
-Exits on memory allocation failure with error message. */
 static void	init_reset(t_cmd_set *p, char **envp)
 {
 	p->cmds = NULL;
@@ -56,21 +50,18 @@ static void	init_reset(t_cmd_set *p, char **envp)
 		{
 			if (!allocate_env_vars_if_envp_empty(p))
 			{
-				ft_printf_fd(2, "Error: Failed to duplicate env variables");
+				ft_putendl_fd("Error: Failed to duplicate env variables", 2);
 				free_exit(p, 1, NULL);
 			}
 		}
 		else
 		{
-			ft_printf_fd(2, "Error: Failed to allocate memory for p->envp");
+			ft_putendl_fd("Error: Failed to allocate memory for p->envp", 2);
 			free_exit(p, 1, NULL);
 		}
 	}
 }
 
-/* Initializes the shell state, sets envp and system vars like PWD and SHLVL.
-Increments SHLVL, sets default PATH if not present,
-prints a warning if arguments were passed to minishell. */
 void	init(t_cmd_set *p, char **envp, char **argv, int argc)
 {
 	char	*path;
@@ -79,7 +70,7 @@ void	init(t_cmd_set *p, char **envp, char **argv, int argc)
 	char	*num;
 
 	if (argc > 1 || argv[1])
-		ft_printf_fd(2, "Arguments have been ignored.\n");
+		ft_putendl_fd("Arguments have been ignored", 2);
 	init_reset(p, envp);
 	path = ft_getenv("PATH", p->envp);
 	if (path == NULL)

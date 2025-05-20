@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "../inc/minishell.h"
-
 /* Checks for invalid syntax patterns in the token array.
 Handles cases like redirection without argument, or invalid sequences.
 Returns a string representing the unexpected token or "newline". */
@@ -72,9 +71,6 @@ static t_cmd	*check_redir_pipe(t_cmd *t, char **a[2], int *i, t_cmd_set *p)
 	return (t);
 }
 
-/* Duplicates the args array and removes quotes from each argument.
-Used to clean argument values before building command structures.
-Returns the new cleaned array. */
 static char	**args_after_quotes_removed(char **args)
 {
 	char	**temp;
@@ -92,9 +88,6 @@ static char	**args_after_quotes_removed(char **args)
 	return (temp);
 }
 
-/* Parses a list of arguments into a linked list of t_cmd structs.
-Handles quote removal, redirections, pipe splitting, and syntax validation.
-Returns the built list, or frees and exits early on error. */
 static t_list	*parse_cmds(char **args, int i, t_cmd_set *p)
 {
 	t_list	*cmds[2];
@@ -123,6 +116,10 @@ static t_list	*parse_cmds(char **args, int i, t_cmd_set *p)
 	return (cmds[0]);
 }
 
+/* Parses and executes the given arguments.
+Uses parse_cmds to build the command list.
+Sets the $_ variable and calls exec_cmd_and_wait.
+Returns the original pointer after execution. */
 void	*parse_nodes(char **args, t_cmd_set *p)
 {
 	int	is_exit;

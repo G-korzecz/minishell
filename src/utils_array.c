@@ -12,8 +12,6 @@
 
 #include "../inc/minishell.h"
 
-/* Returns the number of elements in a NULL-terminated string array.
-Used for envp or other argument arrays. */
 int	ft_arr_len(char **m)
 {
 	int	i;
@@ -26,8 +24,6 @@ int	ft_arr_len(char **m)
 	return (i);
 }
 
-/* Creates a deep copy of a NULL-terminated string array.
-Each string is duplicated. Returns the new array or NULL on failure. */
 char	**ft_dup_array(char **arr_ptr)
 {
 	char	**arr_copy;
@@ -53,9 +49,6 @@ char	**ft_dup_array(char **arr_ptr)
 	return (arr_copy);
 }
 
-/* Inserts a new string into a string array (like adding an env var).
-Returns a new array with the string added at the end.
-Frees the original input array. */
 char	**ft_array_insert(char **in, char *newstr)
 {
 	char	**out;
@@ -85,9 +78,6 @@ char	**ft_array_insert(char **in, char *newstr)
 	return (out);
 }
 
-/* Replaces the n-th element of a string array with another string array.
-Inserts all elements of 'small' in place of 'big[n]'.
-Frees the original array and returns the new one. */
 char	**ft_array_replace(char ***big, char **small, int n)
 {
 	char	**tmpstr;

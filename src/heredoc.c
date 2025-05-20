@@ -12,8 +12,6 @@
 
 #include "../inc/minishell.h"
 
-/* loop for reading heredoc text via readline 
-	exits loop when delimiter is entered or Ctrl+C is pressed */
 char	*get_here_str(char *str[3], char *lim, t_cmd_set *p)
 {
 	p->status_code = 0;
@@ -43,7 +41,6 @@ char	*get_here_str(char *str[3], char *lim, t_cmd_set *p)
 	return (free_all(str[0], NULL, NULL, NULL), str[1]);
 }
 
-/* expand the env variables in text */
 static void	process_here(char *str[1], int fd[2], t_cmd_set *p, int expand)
 {
 	int	i;
@@ -78,8 +75,10 @@ char	*trim_all_quotes(char *str)
 		if (str[i] != '\'' && str[i] != '\"')
 			result_len++;
 	result = (char *)malloc(result_len + 1);
-	if (result == NULL)
+	if (!result)
+	{
 		return (NULL);
+	}
 	j = 0;
 	i = -1;
 	while (++i < len)
@@ -89,9 +88,6 @@ char	*trim_all_quotes(char *str)
 	return (result);
 }
 
-/* sets the signals for heredoc, creates a pipe to write the 
-	content to the write end: fd[1] , returns the read end: fd[0]
-	so that the content can later be read */
 int	read_heredoc(char *str[3], char *tmpstr[2], t_cmd_set *p)
 {
 	int	fd[2];
@@ -119,8 +115,6 @@ int	read_heredoc(char *str[3], char *tmpstr[2], t_cmd_set *p)
 	return (fd[0]);
 }
 
-/* calls the read_heredoc to read from heredoc, saves the read end 
-	fd[0] in the struct node->in_fd */
 t_cmd	*in_fd_heredoc(t_cmd *node, char **args, int *i, t_cmd_set *p)
 {
 	char	*tmpstr[2];
@@ -141,7 +135,7 @@ t_cmd	*in_fd_heredoc(t_cmd *node, char **args, int *i, t_cmd_set *p)
 		*i = -1;
 		if (node->in_fd != -1)
 		{
-			error_token_newline();
+			ft_putendl_fd("syntax error near unexpected token `newline'", 2);
 			p->status_code = 2;
 		}
 	}

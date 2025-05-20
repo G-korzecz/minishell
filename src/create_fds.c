@@ -12,39 +12,35 @@
 
 #include "../inc/minishell.h"
 
-/*Opens a file at "path" with appropriate flags.
-Closes "oldfd" if it's valid (> 2).
-Returns the new file descriptor or -1 on failure and sets error status.*/
 int	get_fd(int oldfd, char *path, int flags[2], t_cmd_set *p)
 {
 	int	fd;
 
-	fd = -1;
 	if (oldfd > 2)
 		close(oldfd);
 	if (!path)
 		return (-1);
+	if (access(path, F_OK) == -1 && !flags[0] && ft_lstsize(p->cmds) == 1)
+		put_err("NoFile_NoDir", path, 0, p);
+	else if (access(path, F_OK) == -1 && !flags[0])
+		put_err("NoFile_NoDir", path, 1, p);
+	else if (!flags[0] && (access(path, R_OK) == -1)
+		&& ft_lstsize(p->cmds) == 1)
+		put_err("Perm_Denied", path, 126, p);
+	else if (flags[0] && access(path, W_OK) == -1 && access(path, F_OK) == 0
+		&& ft_lstsize(p->cmds) == 1)
+		put_err("Perm_Denied", path, 126, p);
 	if (flags[0] && flags[1])
 		fd = open(path, O_CREAT | O_WRONLY | O_APPEND, 0664);
-	else if (flags[0])
+	else if (flags[0] && !flags[1])
 		fd = open(path, O_CREAT | O_WRONLY | O_TRUNC, 0664);
-	else
+	else if (!flags[0] && oldfd != -1)
 		fd = open(path, O_RDONLY);
-	if (fd == -1)
-	{
-		if (errno == EACCES)
-			put_err("Perm_Denied", path, 126, p);
-		else if (errno == ENOENT)
-			put_err("NoFile_NoDir", path, 127, p);
-		else
-			put_err("Open_Failed", path, 1, p);
-	}
+	else
+		fd = oldfd;
 	return (fd);
 }
 
-/* Sets the out_fd in truncate mode i.e. ls > out.txt
-Calls the get_fd to create the file.
-Truncate will delete the old content of file and add new content */
 t_cmd	*out_fd_truncate(t_cmd *node, char **args, int *i, t_cmd_set *p)
 {
 	int	flags[2];
@@ -59,7 +55,7 @@ t_cmd	*out_fd_truncate(t_cmd *node, char **args, int *i, t_cmd_set *p)
 		*i = -1;
 		if (node->out_fd != -1)
 		{
-			error_token_newline();
+			ft_putendl_fd("syntax error near unexpected token `newline'", 2);
 			p->status_code = 2;
 		}
 		else
@@ -68,8 +64,6 @@ t_cmd	*out_fd_truncate(t_cmd *node, char **args, int *i, t_cmd_set *p)
 	return (node);
 }
 
-/* Sets the out_fd in append mode i.e. ls >> out.txt
-Calls the get_fd to create the file. */
 t_cmd	*out_fd_append(t_cmd *node, char **args, int *i, t_cmd_set *p)
 {
 	int	flags[2];
@@ -84,7 +78,7 @@ t_cmd	*out_fd_append(t_cmd *node, char **args, int *i, t_cmd_set *p)
 		*i = -1;
 		if (node->out_fd != -1)
 		{
-			error_token_newline();
+			ft_putendl_fd("syntax error near unexpected token `newline'", 2);
 			p->status_code = 2;
 		}
 		else
@@ -93,9 +87,6 @@ t_cmd	*out_fd_append(t_cmd *node, char **args, int *i, t_cmd_set *p)
 	return (node);
 }
 
-/* Sets in_fd to read from a file i.e.  <input.txt cat
-Calls the get_fd to create the file.
-Append will not delete old content, but add text to the end of file. */
 t_cmd	*in_fd_read(t_cmd *node, char **args, int *i, t_cmd_set *p)
 {
 	int	flags[2];
@@ -109,7 +100,7 @@ t_cmd	*in_fd_read(t_cmd *node, char **args, int *i, t_cmd_set *p)
 	{
 		if (node->in_fd != -1)
 		{
-			error_token_newline();
+			ft_putendl_fd("syntax error near unexpected token `newline'", 2);
 			p->status_code = 2;
 		}
 		if (p && p->cmds && ft_lstsize(p->cmds) != 1)

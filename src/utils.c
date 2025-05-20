@@ -12,8 +12,9 @@
 
 #include "../inc/minishell.h"
 
-/* Counts how many times character 'c' appears in string 's'.
-Returns 0 if string is NULL. */
+/* Used in builtin echo to count the number of characters that are 'n' in an 
+argument of function echo.
+ex : "echo -nnnn" : countc = 4 = ft_strlen(arg[1]) - 1*/
 int	ft_countc(char *s, char c)
 {
 	int	count;
@@ -30,9 +31,8 @@ int	ft_countc(char *s, char c)
 	return (count);
 }
 
-/* Returns index of a char (from a set of chars) in a string.
-	if any of the chars is found in the string, returns the index.
-	if none of chars found in string, -1 is returned. */
+/* used in read_heredoc to check if heredoc delimiter (ex EOF)
+has any quotes in it, "" doesnt expand $VARIABLES.*/
 int	ft_strchrs_idx(const char *s, char *set)
 {
 	int	i;
@@ -49,7 +49,10 @@ int	ft_strchrs_idx(const char *s, char *set)
 	return (-1);
 }
 
-/* Returns index of a char in a string if found, else -1 if not found. */
+/* Searches for the first occurrence of character 'c' in the string 's'.
+Returns the index of the character if found.
+If the character is '\0', returns the length of the string.
+Returns -1 if 's' is NULL or if 'c' is not found in the string. */
 int	ft_strchr_idx(const char *s, int c)
 {
 	unsigned char	c_unsigned;

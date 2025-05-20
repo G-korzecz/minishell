@@ -26,6 +26,8 @@ static char	*generate_prompt(void)
 	if (cwd == NULL)
 		return (NULL);
 	prompt = ft_strjoin(cwd, "$ ");
+	if (prompt == NULL)
+		return (NULL);
 	free(cwd);
 	return (prompt);
 }
@@ -67,7 +69,7 @@ static void	handle_non_interactive_input(t_cmd_set *p)
 	free_all(line, NULL, NULL, NULL);
 }
 
-/* init & set_signal initialise everything we use.
+/* Init & set_signal initialise everything we use.
 isatty(0) = Is standard input connected to a terminal?
 if yes, interactive mode, if not, non-interactive mode. */
 int	main(int argc, char **argv, char **envp)

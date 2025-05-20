@@ -14,7 +14,7 @@
 
 void	exec_cmd_and_wait(t_cmd_set *p, int status, int tmp[2], int *is_exit)
 {
-	tmp[1] = handle_parent_builtins(p, p->cmds, is_exit, 0);
+	tmp[1] = handle_builtins_exit(p, p->cmds, is_exit, 0);
 	if (ft_lstsize(p->cmds) == 1)
 		p->status_code = tmp[1];
 	signal(SIGINT, SIG_IGN);
@@ -41,9 +41,6 @@ void	exec_cmd_and_wait(t_cmd_set *p, int status, int tmp[2], int *is_exit)
 	p->status_code = p->status_code & 255;
 }
 
-/* Duplicates file descriptors, if in_fd is specified -> to stdin.
-If out_fd is specified -> to stdout .
-After duplicate, closes the oldfds. */
 static void	*dup_io_fds(t_list *cmd, int fd[2])
 {
 	t_cmd	*node;
@@ -70,26 +67,28 @@ static void	*dup_io_fds(t_list *cmd, int fd[2])
 	return (NULL);
 }
 
-/* Calls function to set redirections.
-Runs external cmd or internal (pwd,echo,env) in child process. */
 void	*exec_in_child(t_cmd_set *p, t_list *cmd, int fd[2])
 {
 	t_cmd	*n;
+	int		l;
 
 	n = cmd->content;
+	l = 0;
+	if (n->args)
+		l = ft_strlen(*n->args);
 	dup_io_fds(cmd, fd);
 	close(fd[0]);
-	run_execve(p, n, cmd);
+	handle_child_builtins(p, n, l, cmd);
 	if (cmd->next != NULL)
 		p->status_code = 0;
+	l = p->status_code;
 	if (p && p->cmds)
 		ft_lstclear(&p->cmds, free_lst);
 	if (p && p->envp)
 		free_array(&p->envp);
-	exit(p->status_code);
+	exit(l);
 }
 
-/* Creates child process, call func to run the cmd in child process. */
 void	create_fork(t_cmd_set *p, t_list *cmd, int fd[2])
 {
 	pid_t	pid;
@@ -111,10 +110,6 @@ void	create_fork(t_cmd_set *p, t_list *cmd, int fd[2])
 		exec_in_child(p, cmd, fd);
 }
 
-/* Checks if the cmd is executable, if not checks if it is a directory.
-If it is a directory sets status_code to 126.
-If it is not a directory sets status_code to 127.
-If it's executable then calls the create_fork function. */
 void	*chk_perm_call_child(t_cmd_set *p, t_list *cmd, int fd[2])
 {
 	t_cmd	*n;

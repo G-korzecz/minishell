@@ -31,7 +31,7 @@ int	builtin_echo(t_list *cmd)
 		else
 		{
 			j = 1;
-			ft_putstr_fd(args[i], 1);
+			ft_printf_fd(1, "%s", args[i]);
 			if (args[i + 1])
 				ft_putchar_fd(' ', 1);
 		}

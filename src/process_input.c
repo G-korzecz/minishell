@@ -12,28 +12,6 @@
 
 #include "../inc/minishell.h"
 
-/* Checks if a string has unclosed single or double quotes.
-Returns 1 if unclosed, 0 otherwise. */
-static int	check_unclosed_quotes(const char *s)
-{
-	int	squote;
-	int	dquote;
-	int	i;
-
-	squote = 0;
-	dquote = 0;
-	i = 0;
-	while (s && s[i])
-	{
-		if (s[i] == '\'' && dquote == 0)
-			squote = !squote;
-		else if (s[i] == '"' && squote == 0)
-			dquote = !dquote;
-		i++;
-	}
-	return (squote || dquote);
-}
-
 /* Checks if the current character is "${" and not inside quotes.
 Updates quote states. Used in remove_curly_brackets(). */
 int	update_quotes_chk_curly_bracket(int *quotes, char ch, int i[3], char **s)
@@ -126,4 +104,35 @@ void	*process_input(char *input, t_cmd_set *p)
 	if (p && p->cmds)
 		ft_lstclear(&p->cmds, free_lst);
 	return (p);
+}
+
+/* Scans the input string for heredoc operators (<<) outside quotes.
+Wraps the delimiter with single quotes to prevent expansion later.
+Modifies the input string in-place using tmp for partial rebuilding. */
+void	process_heredoc(char **s, int i[3], int quotes[2], char *tmp[3])
+{
+	while (*s && i[0] < (int)ft_strlen(*s) && (*s)[++i[0]])
+	{
+		if (update_quotes_chk_heredoc(quotes, (*s)[i[0]], i, s))
+		{
+			i[1] = i[0] + 2;
+			while ((*s)[i[1]] && (ft_strchr(" \\t", (*s)[i[1]])))
+				i[1]++;
+			i[2] = i[1];
+			while ((*s)[i[1]] && (*s)[i[1]] != ' ' && (*s)[i[1]] != '\t')
+				i[1]++;
+			tmp[2] = ft_substr(*s, i[2], i[1] - i[2]);
+			tmp[0] = ft_substr(*s, 0, i[0]);
+			tmp[1] = ft_strjoin(tmp[0], "<<'");
+			free(tmp[0]);
+			tmp[0] = ft_strjoin(tmp[1], tmp[2]);
+			free_all(tmp[1], tmp[2], NULL, NULL);
+			tmp[1] = ft_strjoin(tmp[0], "'");
+			free(tmp[0]);
+			tmp[0] = ft_strdup(&(*s)[i[1]]);
+			free_all(*s, NULL, NULL, NULL);
+			*s = ft_strjoin(tmp[1], tmp[0]);
+			free_all(tmp[0], tmp[1], NULL, NULL);
+		}
+	}
 }

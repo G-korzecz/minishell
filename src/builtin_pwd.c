@@ -14,16 +14,12 @@
 
 int	builtin_pwd(void)
 {
-	char	current_wd[PATH_MAX];
+	char	*buf;
 
-	if (getcwd(current_wd, PATH_MAX) != NULL)
-	{
-		printf("%s'n", current_wd);
-		return (0);
-	}
-	else
-	{
-		perror("pwd");
+	buf = getcwd(NULL, 0);
+	if (!buf)
 		return (1);
-	}
+	ft_putendl_fd(buf, 1);
+	free(buf);
+	return (0);
 }

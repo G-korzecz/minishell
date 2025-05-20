@@ -12,9 +12,6 @@
 
 #include "../inc/minishell.h"
 
-/* Initializes a new t_cmd struct for the command list.
-Allocates memory and sets default values for fds and pointers.
-Returns the initialized struct or NULL on malloc failure. */
 t_cmd	*init_cmd(void)
 {
 	t_cmd	*cmd;
@@ -29,9 +26,6 @@ t_cmd	*init_cmd(void)
 	return (cmd);
 }
 
-/* Calculates the number of substrings that would result from
-splitting the string "s" using characters in "set" as delimiters.
-Quotes are respected. Returns -1 if quotes are unclosed. */
 static int	size_to_malloc(char *s, char *set, int count)
 {
 	int	q[2];
@@ -40,7 +34,7 @@ static int	size_to_malloc(char *s, char *set, int count)
 	i = 0;
 	q[0] = 0;
 	q[1] = 0;
-	while (s != NULL && s[i] != '\0')
+	while (s && s[i] != '\0')
 	{
 		count++;
 		if (!ft_strchr(set, s[i]))
@@ -60,10 +54,7 @@ static int	size_to_malloc(char *s, char *set, int count)
 	return (count);
 }
 
-/* Parses the string "s" and fills "tmpstr" with substrings
-split using characters in "set", while preserving quoted blocks.
-Uses index array i[0]=scan, i[1]=start, i[2]=insert index. */
-static char	**add_to_array2(char **tmpstr, char *s, char *set, int i[3])
+static char	**ft_add_to_array(char **tmpstr, char *s, char *set, int i[3])
 {
 	int	q[2];
 
@@ -88,10 +79,7 @@ static char	**add_to_array2(char **tmpstr, char *s, char *set, int i[3])
 	return (tmpstr);
 }
 
-/* Splits string "s" into tokens using special characters in "set"
-as delimiters. Handles quoted substrings properly.
-Returns a newly allocated array of tokens or NULL on failure. */
-static char	**split_with_pipe_or_redir_char(char const *s, char *set)
+char	**ft_split_with_pipe_or_redir_char(char const *s, char *set)
 {
 	char	**tmp;
 	int		word_count;
@@ -108,14 +96,11 @@ static char	**split_with_pipe_or_redir_char(char const *s, char *set)
 	tmp = malloc((word_count + 1) * sizeof(char *));
 	if (tmp == NULL)
 		return (NULL);
-	tmp = add_to_array2(tmp, (char *)s, set, i);
+	tmp = ft_add_to_array(tmp, (char *)s, set, i);
 	tmp[word_count] = NULL;
 	return (tmp);
 }
 
-/* Splits each element in the "args" array using <, >, or | as delimiters.
-Handles quotes correctly and updates the array in-place.
-Returns the updated argument array. */
 char	**split_with_special_chars(char **args)
 {
 	char	**subsplit;
@@ -124,7 +109,7 @@ char	**split_with_special_chars(char **args)
 	i[2] = -1;
 	while (args && args[++i[2]])
 	{
-		subsplit = split_with_pipe_or_redir_char(args[i[2]], "<|>");
+		subsplit = ft_split_with_pipe_or_redir_char(args[i[2]], "<|>");
 		ft_array_replace(&args, subsplit, i[2]);
 		i[2] += ft_arr_len(subsplit) - 1;
 		free_array(&subsplit);
