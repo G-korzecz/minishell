@@ -65,30 +65,30 @@ void	*forked_builtins_and_rest(t_cmd_set *p, t_list *cmd)
 int	handle_builtins_exit(t_cmd_set *p, t_list *cmd, int *is_exit, int n)
 {
 	char	**a;
-	int		s;
-	int		one;
+	int		status_code;
 
-	s = 0;
-	one = ft_lstsize(p->cmds) == 1;
 	while (cmd)
 	{
+		status_code = 0;
 		a = ((t_cmd *)cmd->content)->args;
 		n = 0;
 		if (a)
 			n = ft_strlen(*a);
-		if (a && n == 4 && !ft_strncmp(*a, "exit", 4) && one)
+		if (a && !ft_strncmp(*a, "exit", n) && n == 4 && ft_lstsize(p->cmds) == 1)
 			builtin_exit(cmd, is_exit, p);
-		else if (a && n == 2 && !ft_strncmp(*a, "cd", 2) && one)
-			s = builtin_cd(p, a);
-		else if (a && n == 6 && !ft_strncmp(*a, "export", 6) && one)
-			s = builtin_export(p, a);
-		else if (a && n == 5 && !ft_strncmp(*a, "unset", 5) && one)
-			s = builtin_unset(p, a);
+		else if (!cmd->next && a && !ft_strncmp(*a, "cd", n) && n == 2)
+			status_code = builtin_cd(p, a);
+		else if (!cmd->next && a && !ft_strncmp(*a, "export", n) && n == 6)
+			status_code = builtin_export(p, a);
+		else if (!cmd->next && a && !ft_strncmp(*a, "unset", n) && n == 5)
+			status_code = builtin_unset(p, a);
 		else
 			forked_builtins_and_rest(p, cmd);
+		if (cmd->next)
+			status_code = 0;
 		cmd = cmd->next;
 	}
-	return (s);
+	return (status_code);
 }
 
 void	handle_child_builtins(t_cmd_set *p, t_cmd *n, int l, t_list *cmd)
@@ -100,18 +100,12 @@ void	handle_child_builtins(t_cmd_set *p, t_cmd *n, int l, t_list *cmd)
 		execve(n->cmd_path, n->args, p->envp);
 	else if (n->args && !ft_strncmp(*n->args, "pwd", l) && l == 3)
 		p->status_code = builtin_pwd();
-	else if (n->args && !ft_strncmp(*n->args, "echo", l) && l == 4)
+	else if (is_builtin(n) && n->args
+		&& !ft_strncmp(*n->args, "echo", l) && l == 4)
 		p->status_code = builtin_echo(cmd);
-	else if (n->args && !ft_strncmp(*n->args, "env", l) && l == 3)
-		p->status_code = builtin_env(p->envp);
-	else if (n->args && !ft_strncmp(*n->args, "exit", l) && l == 4)
-		p->status_code = builtin_exit_child(cmd);
-	else if (n->args && !ft_strncmp(*n->args, "cd", l) && l == 2)
-		p->status_code = builtin_cd(p, n->args);
-	else if (n->args && !ft_strncmp(*n->args, "export", l) && l == 6)
-		p->status_code = builtin_export(p, n->args);
-	else if (n->args && !ft_strncmp(*n->args, "unset", l) && l == 5)
-		p->status_code = builtin_unset(p, n->args);
+	else if (is_builtin(n) && n->args
+		&& !ft_strncmp(*n->args, "env", l) && l == 3)
+		builtin_env(p->envp);
 	if (cmd->next)
 		p->status_code = 0;
 }

@@ -12,6 +12,28 @@
 
 #include "../inc/minishell.h"
 
+/* Checks if a string has unclosed single or double quotes.
+Returns 1 if unclosed, 0 otherwise. */
+static int	check_unclosed_quotes(const char *s)
+{
+	int	squote;
+	int	dquote;
+	int	i;
+
+	squote = 0;
+	dquote = 0;
+	i = 0;
+	while (s && s[i])
+	{
+		if (s[i] == '\'' && dquote == 0)
+			squote = !squote;
+		else if (s[i] == '"' && squote == 0)
+			dquote = !dquote;
+		i++;
+	}
+	return (squote || dquote);
+}
+
 /* Checks if the current character is "${" and not inside quotes.
 Updates quote states. Used in remove_curly_brackets(). */
 int	update_quotes_chk_curly_bracket(int *quotes, char ch, int i[3], char **s)
@@ -135,4 +157,18 @@ void	process_heredoc(char **s, int i[3], int quotes[2], char *tmp[3])
 			free_all(tmp[0], tmp[1], NULL, NULL);
 		}
 	}
+}
+
+/* Handles modifications to the input string before parsing.
+Processes heredoc delimiters and expands ${VAR} and $VAR.
+Updates the input string in-place with all applied changes. */
+void	handle_input(char **input, int i[3], int quotes[2], t_cmd_set *p)
+{
+	char	*tmp[3];
+
+	if (ft_strnstr(*input, "<<", ft_strlen(*input)))
+		process_heredoc(input, i, quotes, tmp);
+	if (ft_strnstr(*input, "${", ft_strlen(*input)))
+		remove_curly_brackets(input, i, quotes, tmp);
+	*input = var_expander(*input, quotes, p);
 }

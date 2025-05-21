@@ -29,11 +29,11 @@
 # include <errno.h>
 
 /* Used to store the exit status of last command used
-Also used with CTRL + D | CTRL + C | CTRL + /. */
+Also used with CTRL + D | CTRL + C | CTRL + / */
 extern int	g_exit_status;
 
-/* Struct which are saved in the content of a linked list for each command
-    cmd options(args), cmd_path, in_fd, output_pd. */
+/* struct which are saved in the content of a linked list for each command
+    cmd options(args), cmd_path, in_fd, output_pd */
 typedef struct s_cmd
 {
 	char	**args;
@@ -42,7 +42,7 @@ typedef struct s_cmd
 	int		out_fd;
 }			t_cmd;
 
-/* Struct with envp, status_code and pointer to linked list of cmds. */
+/* struct with envp, status_code and pointer to linked list of cmds */
 typedef struct s_cmd_set
 {
 	t_list	*cmds;
@@ -79,7 +79,6 @@ char	*remove_quotes(char const *s1, int squote, int dquote);
 char	*var_expander(char *str, int quotes[2], t_cmd_set *p);
 char	*ft_getenv(char *var, char **envp);
 char	**ft_setenv(char *var, char *value, char **envp);
-int		find_env_var_index(char *var, char **envp);
 t_list	*free_tmp_lst(t_list *cmds, char **args, char **temp);
 
 /* Free and exit */
@@ -92,7 +91,6 @@ void	init(t_cmd_set *p, char **envp, char **argv, int argc);
 
 /* Command Processing and Execution */
 
-int		check_unclosed_quotes(const char *s);
 void	*process_input(char *out, t_cmd_set *p);
 void	process_heredoc(char **s, int i[3], int quotes[2], char *tmp[3]);
 void	handle_input(char **input, int i[3], int quotes[2], t_cmd_set *p);
@@ -110,22 +108,25 @@ void	handle_env_vars(char *str, int *i, int fd[2], t_cmd_set *p);
 void	free_lst(void *content);
 void	free_all(char *s1, char *s2, char *s3, char *s4);
 void	exec_cmd_and_wait(t_cmd_set *p, int status, int tmp[2], int *is_exit);
+void	run_execve(t_cmd_set *p, t_cmd *n, t_list *cmd);
 t_cmd	*init_cmd(void);
-
-/* Builtins helpers | execute */
-
-int		is_builtin(t_cmd *n);
-int		handle_builtins_exit(t_cmd_set *p, t_list *cmd, int *is_exit, int n);
-void	handle_child_builtins(t_cmd_set *p, t_cmd *n, int l, t_list *cmd);
+void	*setup_command_pipe(t_cmd_set *p, t_list *cmd);
 
 /* Builtins */
+
+int		is_builtin(t_cmd *n);
+
 void	builtin_exit(t_list *cmd, int *is_exit, t_cmd_set *p);
-int		builtin_exit_child(t_list *cmd);
-int		builtin_env(char **m);
+
+void	builtin_env(char **m);
 int		builtin_export(t_cmd_set *p, char **args);
 int		builtin_unset(t_cmd_set *p, char **args);
 int		builtin_pwd(void);
 int		builtin_echo(t_list *cmd);
 int		builtin_cd(t_cmd_set *p, char **cmd_args);
+int		handle_builtins_exit(t_cmd_set *p, t_list *cmd, int *is_exit, int n);
+void	handle_child_builtins(t_cmd_set *p, t_cmd *n, int l, t_list *cmd);
+void	set_signals(t_cmd_set *p);
+int		find_env_var_index(char *var, char **envp);
 
 #endif
