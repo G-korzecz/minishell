@@ -12,6 +12,9 @@
 
 #include "../inc/minishell.h"
 
+/* First check if -n (or -nnnn is present) via countc and flag print_newline
+j is flag to check if we started printing or not. Start at arg[1].
+Print every arg with one and only one space between them.*/
 int	builtin_echo(t_list *cmd)
 {
 	int		print_newline;
@@ -25,7 +28,7 @@ int	builtin_echo(t_list *cmd)
 	args = ((t_cmd *)cmd->content)->args;
 	while (args && args[++i])
 	{
-		if (!j && !ft_strncmp(args[i], "-n", 2) && (ft_countc(args[i],
+		if (!j && !ft_strncmp(args[i], "-n", 2) && (countc(args[i],
 					'n') == (int)(ft_strlen(args[i]) - 1)))
 			print_newline = 0;
 		else

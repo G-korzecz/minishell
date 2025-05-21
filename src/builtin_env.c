@@ -6,20 +6,30 @@
 /*   By: gkorzecz <gkorzec@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/14 00:04:56 by gkorzecz          #+#    #+#             */
-/*   Updated: 2025/05/14 00:05:28 by gkorzecz         ###   ########.fr       */
+/*   Updated: 2025/05/20 21:49:51 by gkorzecz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/minishell.h"
 
-void	builtin_env(char **m)
+/* Used to print env variable that are not empty (meaning is there is a = sign
+it prints it.)
+Loop through the array until last string is null.*/
+int	builtin_env(char **envp)
 {
 	int	i;
 
 	i = 0;
-	while (m && m[i])
+	if (!envp)
 	{
-		ft_putendl_fd(m[i], 1);
+		perror("envp");
+		return (1);
+	}
+	while (envp[i] != NULL)
+	{
+		if (ft_strchr(envp[i], '='))
+			printf("%s\n", envp[i]);
 		i++;
 	}
+	return (0);
 }

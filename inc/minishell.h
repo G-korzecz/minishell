@@ -66,7 +66,7 @@ void	set_signals(t_cmd_set *p);
 
 /* String and Array Manipulation */
 
-int		ft_countc(char *s, char c);
+int		countc(char *s, char c);
 int		ft_arr_len(char **m);
 int		ft_strchrs_idx(const char *s, char *set);
 int		ft_strchr_idx(const char *s, int c);
@@ -91,6 +91,7 @@ void	init(t_cmd_set *p, char **envp, char **argv, int argc);
 
 /* Command Processing and Execution */
 
+int		check_unclosed_quotes(const char *s);
 void	*process_input(char *out, t_cmd_set *p);
 void	process_heredoc(char **s, int i[3], int quotes[2], char *tmp[3]);
 void	handle_input(char **input, int i[3], int quotes[2], t_cmd_set *p);
@@ -118,7 +119,7 @@ int		is_builtin(t_cmd *n);
 
 void	builtin_exit(t_list *cmd, int *is_exit, t_cmd_set *p);
 
-void	builtin_env(char **m);
+int		builtin_env(char **m);
 int		builtin_export(t_cmd_set *p, char **args);
 int		builtin_unset(t_cmd_set *p, char **args);
 int		builtin_pwd(void);
@@ -128,5 +129,6 @@ int		handle_builtins_exit(t_cmd_set *p, t_list *cmd, int *is_exit, int n);
 void	handle_child_builtins(t_cmd_set *p, t_cmd *n, int l, t_list *cmd);
 void	set_signals(t_cmd_set *p);
 int		find_env_var_index(char *var, char **envp);
+int		builtin_exit_child(t_list *cmd);
 
 #endif

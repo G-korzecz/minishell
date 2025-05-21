@@ -12,23 +12,29 @@
 
 #include "../inc/minishell.h"
 
-int	var_in_envp(char *argv, char **envp, int ij[2])
+/* Search for a variable in the environment.
+Checks if the given assignment string exists in envp.
+Returns 1 if found, 0 if not, -1 if the format is invalid. */
+int	var_in_envp(char *argv, char **envp, int *index)
 {
 	int	pos;
 
-	ij[1] = 0;
+	*index = 0;
 	pos = ft_strchr_idx(argv, '=');
 	if (pos == -1)
 		return (-1);
-	while (envp[ij[1]])
+	while (envp[*index])
 	{
-		if (!ft_strncmp(envp[ij[1]], argv, pos + 1))
+		if (!ft_strncmp(envp[*index], argv, pos + 1))
 			return (1);
-		ij[1]++;
+		(*index)++;
 	}
 	return (0);
 }
 
+/* Validate a variable name for export.
+Ensures the string has a valid format before inserting.
+Returns 1 if valid, prints error and returns 0 if invalid. */
 int	is_valid_identifier(char *str)
 {
 	int	j;
@@ -56,28 +62,31 @@ int	is_valid_identifier(char *str)
 	return (1);
 }
 
+/*Validates and inserts or updates environment variables.
+Skips invalid entries and prints errors accordingly. */
 int	builtin_export(t_cmd_set *p, char **args)
 {
-	int		ij[2];
-	int		pos;
+	int	i;
+	int	pos;
+	int	index;
 
 	if (ft_arr_len(args) >= 2)
 	{
-		ij[0] = 1;
-		while (args[ij[0]])
+		i = 1;
+		while (args[i])
 		{
-			if (!is_valid_identifier(args[ij[0]]))
+			if (!is_valid_identifier(args[i]))
 				return (1);
-			pos = var_in_envp(args[ij[0]], p->envp, ij);
+			pos = var_in_envp(args[i], p->envp, &index);
 			if (pos == 1)
 			{
-				if (p->envp[ij[1]])
-					free(p->envp[ij[1]]);
-				p->envp[ij[1]] = ft_strdup(args[ij[0]]);
+				if (p->envp[index])
+					free(p->envp[index]);
+				p->envp[index] = ft_strdup(args[i]);
 			}
 			else if (!pos)
-				p->envp = ft_array_insert(p->envp, args[ij[0]]);
-			ij[0]++;
+				p->envp = ft_array_insert(p->envp, args[i]);
+			i++;
 		}
 	}
 	return (0);

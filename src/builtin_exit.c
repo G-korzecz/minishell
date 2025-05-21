@@ -12,31 +12,100 @@
 
 #include "../inc/minishell.h"
 
+/* Parse digits from a numeric string
+Safely accumulates digits into an unsigned long while checking
+for overflows based on the given sign. Returns 0 on overflow. */
+int	parse_digits(const char *str, int *i, unsigned long *n, int sign)
+{
+	while (str[*i] && ft_isdigit(str[*i]))
+	{
+		*n = *n * 10 + (str[*i] - '0');
+		if ((sign == 1 && *n > LLONG_MAX)
+			|| (sign == -1 && *n > (unsigned long)LLONG_MAX + 1))
+			return (0);
+		(*i)++;
+	}
+	return (1);
+}
+
+/* Strict string-to-integer parser
+Parses a string into a long long while enforcing numeric-only format.
+Handles optional +/-, checks for overflow, and returns 0 if invalid. */
+int	parse_strict_ll(const char *str, long long *out)
+{
+	int				sign;
+	int				i;
+	unsigned long	n;
+
+	i = 0;
+	n = 0;
+	sign = 1;
+	if (!str || !str[0])
+		return (0);
+	if (str[i] == '-' || str[i] == '+')
+	{
+		if (str[i] == '-')
+			sign = -1;
+		i++;
+	}
+	if (!ft_isdigit(str[i]))
+		return (0);
+	if (!parse_digits(str, &i, &n, sign))
+		return (0);
+	if (str[i])
+		return (0);
+	*out = sign * (long long)n;
+	return (1);
+}
+
+/* Builtin exit for parent context
+Handles `exit` command with numeric validation, overflow detection,
+error messaging, and proper status code truncation. */
 void	builtin_exit(t_list *cmd, int *is_exit, t_cmd_set *p)
 {
-	long long int	status[2];
-	char			**args;
+	long long	status;
+	char		**args;
 
 	args = ((t_cmd *)cmd->content)->args;
 	*is_exit = !cmd->next;
-	if (*is_exit)
-		printf("exit\n");
+	if (*is_exit && ft_lstsize(p->cmds) == 1)
+		ft_putendl_fd("exit", 1);
 	if (!args || !args[1])
 		free_exit(p, 0, NULL);
-	status[1] = ft_atoi(args[1]);
-	if (args[1][0] == '\0' || (status[1] < 0 && ft_strlen(args[1]) > 18)
-		|| (status[1] == 0 && args[1][0] != '0'))
+	if (!parse_strict_ll(args[1], &status))
 	{
-		*is_exit = 1;
-		ft_printf_fd(2, "mini: exit: ");
-		ft_printf_fd(2, "%s", args[1]);
-		free_exit(p, (2 + status[1]) & 255, ": numeric argument required\n");
+		ft_printf_fd(2, "mini: exit: %s: numeric argument required\n", args[1]);
+		free_exit(p, 2, NULL);
 	}
-	else if (args[2])
+	if (args[2])
 	{
 		*is_exit = 0;
 		put_err(NULL, "exit: too many arguments", 1, 0);
 	}
 	if (*is_exit)
-		free_exit(p, status[1] & 255, NULL);
+		free_exit(p, status & 255, NULL);
+}
+
+/* Builtin exit for child process
+Validates argument format and overflow, returns proper exit code,
+and reports errors as needed without exiting the program. */
+int	builtin_exit_child(t_list *cmd)
+{
+	long long	code;
+	char		**args;
+
+	args = ((t_cmd *)cmd->content)->args;
+	if (!args || !args[1])
+		return (0);
+	if (!parse_strict_ll(args[1], &code))
+	{
+		ft_printf_fd(2, "mini: exit: %s: numeric argument required\n", args[1]);
+		return (2);
+	}
+	if (args[2])
+	{
+		ft_putendl_fd("mini: exit: too many arguments", 2);
+		return (1);
+	}
+	return (code & 255);
 }

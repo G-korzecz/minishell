@@ -12,6 +12,7 @@
 
 #include "../inc/minishell.h"
 
+/* Use getcwd to get the current dir then print it. */
 int	builtin_pwd(void)
 {
 	char	*buf;

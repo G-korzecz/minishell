@@ -101,7 +101,8 @@ void	handle_env_vars(char *str, int *i, int fd[2], t_cmd_set *p)
 	}
 	tmp = ft_substr(str, *i + 1, j - *i - 1);
 	tmp2 = ft_getenv(tmp, p->envp);
-	write(fd[1], tmp2, ft_strlen(tmp2));
-	free_all(tmp, tmp2, NULL, NULL);
+	if (tmp2)
+		write(fd[1], tmp2, ft_strlen(tmp2));
 	*i = j - 1;
+	free_all(tmp, tmp2, NULL, NULL);
 }

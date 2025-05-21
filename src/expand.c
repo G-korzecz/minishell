@@ -58,6 +58,32 @@ static char	*var_or_path_expander(char *str, int i, t_cmd_set *p, char *s[4])
 	return (var_expander(res, (int [2]){0, 0}, p));
 }
 
+static char	*remove_dollar_quote(char *str)
+{
+	size_t	i;
+	char	*left;
+	char	*right;
+	char	*tmp;
+
+	i = 0;
+	while (str && str[i])
+	{
+		if (str[i] == '$'
+			&& (str[i + 1] == '"' || str[i + 1] == '\''))
+		{
+			left = ft_substr(str, 0, i);
+			right = ft_strdup(str + i + 1);
+			tmp = ft_strjoin(left, right);
+			free(left);
+			free(right);
+			free(str);
+			return (tmp);
+		}
+		i++;
+	}
+	return (str);
+}
+
 char	*var_expander(char *str, int quotes[2], t_cmd_set *p)
 {
 	char	*tmp[2];
@@ -65,6 +91,7 @@ char	*var_expander(char *str, int quotes[2], t_cmd_set *p)
 	int		i;
 
 	i = -1;
+	str = remove_dollar_quote(str);
 	while (str && str[++i])
 	{
 		quotes[0] = (quotes[0] + (!quotes[1] && str[i] == '\'')) % 2;

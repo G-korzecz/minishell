@@ -61,22 +61,23 @@ char	*find_command(char **env_path, char *cmd, char *cmd_path)
 	return (cmd_path);
 }
 
-/* if there is no / . or ~ sign before the cmd:
-	try to find cmd path, if not found print err cmd not found  */
 static void	process_checks(t_list *cmd, char *path, t_cmd_set *p, char ***s)
 {
 	t_cmd	*n;
 
 	n = cmd->content;
+	if (n->args && n->args[0] && n->args[0][0] == '\0')
+	{
+		put_err("No_Cmd", n->args[0], 127, p);
+		return ;
+	}
 	if (!is_builtin(n) && n->args && !ft_strchr("/.~", n->args[0][0]))
 	{
 		*s = ft_split(path, ':');
 		n->cmd_path = find_command(*s, *n->args, n->cmd_path);
-		if ((!n->cmd_path || !n->args[0]) && n->args[0][0] && !cmd->next
-			&& n->in_fd != -1)
+		if ((!n->cmd_path || !n->args[0]) && !cmd->next && n->in_fd != -1)
 			put_err("No_Cmd", n->args[0], 127, p);
-		else if ((!n->cmd_path || !n->args[0]) && n->args[0][0]
-			&& n->in_fd != -1)
+		else if ((!n->cmd_path || !n->args[0]) && n->in_fd != -1)
 			put_err("No_Cmd", n->args[0], 0, p);
 	}
 }
