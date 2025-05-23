@@ -64,6 +64,7 @@ void	signals_parent(int signal_code);
 void	signals_child(int signal_code);
 void	signals_heredoc(int signal_code);
 void	set_signals(t_cmd_set *p);
+void	disable_ctrl_z(void);
 
 /* String and Array Manipulation */
 

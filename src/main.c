@@ -69,11 +69,6 @@ static void	handle_non_interactive_input(t_cmd_set *p)
 	free_all(line, NULL, NULL, NULL);
 }
 
-void	disable_ctrl_z(void)
-{
-	signal(SIGTSTP, SIG_IGN);
-}
-
 /* Init & set_signal initialise everything we use.
 isatty(0) = Is standard input connected to a terminal?
 if yes, interactive mode, if not, non-interactive mode. */

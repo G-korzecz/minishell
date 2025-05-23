@@ -67,3 +67,8 @@ void	signals_heredoc(int signal_code)
 		rl_on_new_line();
 	}
 }
+
+void	disable_ctrl_z(void)
+{
+	signal(SIGTSTP, SIG_IGN);
+}
