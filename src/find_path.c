@@ -36,29 +36,23 @@ static char	*build_cmd_path(const char *dir, const char *cmd)
 char	*find_command(char **env_path, char *cmd, char *cmd_path)
 {
 	int		i;
-	char	*temp;
 
 	i = -1;
 	while (env_path && env_path[++i])
 	{
 		free_all(cmd_path, NULL, NULL, NULL);
-		cmd_path = NULL;
-		temp = build_cmd_path(env_path[i], cmd);
-		if (!temp)
-			return (NULL);
-		cmd_path = ft_strdup(temp);
-		free(temp);
+		cmd_path = build_cmd_path(env_path[i], cmd);
 		if (!cmd_path)
 			return (NULL);
-		if (access(cmd_path, F_OK) == 0)
-			break ;
+		if (access(cmd_path, X_OK) == 0)
+			return (cmd_path);
 	}
-	if ((!env_path || !env_path[i]) && cmd_path)
-	{
-		free(cmd_path);
-		return (NULL);
-	}
-	return (cmd_path);
+	free_all(cmd_path, NULL, NULL, NULL);
+	cmd_path = build_cmd_path(".", cmd);
+	if (cmd_path && access(cmd_path, X_OK) == 0)
+		return (cmd_path);
+	free_all(cmd_path, NULL, NULL, NULL);
+	return (NULL);
 }
 
 static void	process_checks(t_list *cmd, char *path, t_cmd_set *p, char ***s)

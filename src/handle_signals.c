@@ -12,7 +12,7 @@
 
 #include "../inc/minishell.h"
 
-int		g_exit_status;
+volatile sig_atomic_t	g_exit_status;
 
 void	set_signals(t_cmd_set *p)
 {

@@ -30,7 +30,7 @@
 
 /* Used to store the exit status of last command used
 Also used with CTRL + D | CTRL + C | CTRL + / */
-extern int	g_exit_status;
+extern volatile sig_atomic_t	g_exit_status;
 
 /* struct which are saved in the content of a linked list for each command
     cmd options(args), cmd_path, in_fd, output_pd */
@@ -56,6 +56,7 @@ typedef struct s_cmd_set
 
 void	*put_err(char *err_type, char *param, int err, t_cmd_set *p);
 void	error_token_newline(void);
+void	*put_err_cd(char *err_type, char *path, int code, t_cmd_set *p);
 
 /* Signal Handling */
 
@@ -76,12 +77,17 @@ void	free_array(char ***m);
 char	**ft_array_replace(char ***big, char **small, int n);
 char	**split_and_ignore_space_if_in_quote(char *s, char *set);
 char	*remove_quotes(char const *s1, int squote, int dquote);
-char	*var_expander(char *str, int quotes[2], t_cmd_set *p);
 char	*ft_getenv(char *var, char **envp);
 char	**ft_setenv(char *var, char *value, char **envp);
 t_list	*free_tmp_lst(t_list *cmds, char **args, char **temp);
 
-/* Free and exit */
+/* Expand Variables*/
+
+char	*var_expander(char *str, int quotes[2], t_cmd_set *p);
+char	*remove_dollar_quote(char *str);
+char	*var_or_path_expander(char *str, int i, t_cmd_set *p, char *s[4]);
+
+/* Free and Exit */
 
 void	free_exit(t_cmd_set *p, int exit_code, char *msg);
 
@@ -116,9 +122,7 @@ void	*setup_command_pipe(t_cmd_set *p, t_list *cmd);
 /* Builtins */
 
 int		is_builtin(t_cmd *n);
-
 void	builtin_exit(t_list *cmd, int *is_exit, t_cmd_set *p);
-
 int		builtin_env(char **m);
 int		builtin_export(t_cmd_set *p, char **args);
 int		builtin_unset(t_cmd_set *p, char **args);

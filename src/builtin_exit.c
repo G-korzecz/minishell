@@ -68,8 +68,8 @@ void	builtin_exit(t_list *cmd, int *is_exit, t_cmd_set *p)
 
 	args = ((t_cmd *)cmd->content)->args;
 	*is_exit = !cmd->next;
-	if (*is_exit && ft_lstsize(p->cmds) == 1)
-		ft_putendl_fd("exit", 1);
+	/*if (*is_exit && ft_lstsize(p->cmds) == 1)
+		ft_putendl_fd("exit", 1);*/
 	if (!args || !args[1])
 		free_exit(p, 0, NULL);
 	if (!parse_strict_ll(args[1], &status))
@@ -91,13 +91,13 @@ Validates argument format and overflow, returns proper exit code,
 and reports errors as needed without exiting the program. */
 int	builtin_exit_child(t_list *cmd)
 {
-	long long	code;
+	long long	status;
 	char		**args;
 
 	args = ((t_cmd *)cmd->content)->args;
 	if (!args || !args[1])
 		return (0);
-	if (!parse_strict_ll(args[1], &code))
+	if (!parse_strict_ll(args[1], &status))
 	{
 		ft_printf_fd(2, "mini: exit: %s: numeric argument required\n", args[1]);
 		return (2);
@@ -107,5 +107,5 @@ int	builtin_exit_child(t_list *cmd)
 		ft_putendl_fd("mini: exit: too many arguments", 2);
 		return (1);
 	}
-	return (code & 255);
+	return (status & 255);
 }

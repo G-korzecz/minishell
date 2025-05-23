@@ -22,5 +22,6 @@ void	free_exit(t_cmd_set *p, int exit_code, char *msg)
 		free_array(&p->envp);
 	if (p && p->cmds)
 		ft_lstclear(&p->cmds, free_lst);
+	rl_clear_history();
 	exit(exit_code);
 }

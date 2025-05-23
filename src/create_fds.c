@@ -20,24 +20,20 @@ int	get_fd(int oldfd, char *path, int flags[2], t_cmd_set *p)
 		close(oldfd);
 	if (!path)
 		return (-1);
-	if (access(path, F_OK) == -1 && !flags[0] && ft_lstsize(p->cmds) == 1)
-		put_err("NoFile_NoDir", path, 0, p);
-	else if (access(path, F_OK) == -1 && !flags[0])
-		put_err("NoFile_NoDir", path, 1, p);
-	else if (!flags[0] && (access(path, R_OK) == -1)
-		&& ft_lstsize(p->cmds) == 1)
-		put_err("Perm_Denied", path, 126, p);
-	else if (flags[0] && access(path, W_OK) == -1 && access(path, F_OK) == 0
-		&& ft_lstsize(p->cmds) == 1)
-		put_err("Perm_Denied", path, 126, p);
+	if (!flags[0] && access(path, F_OK) == -1)
+		return (put_err("NoFile_NoDir", path, 1, p), -1);
+	if (!flags[0] && access(path, R_OK) == -1)
+		return (put_err("Perm_Denied", path, 1, p), -1);
+	if (flags[0] && access(path, F_OK) == 0 && access(path, W_OK) == -1)
+		return (put_err("Perm_Denied", path, 1, p), -1);
 	if (flags[0] && flags[1])
 		fd = open(path, O_CREAT | O_WRONLY | O_APPEND, 0664);
-	else if (flags[0] && !flags[1])
+	else if (flags[0])
 		fd = open(path, O_CREAT | O_WRONLY | O_TRUNC, 0664);
-	else if (!flags[0] && oldfd != -1)
-		fd = open(path, O_RDONLY);
 	else
-		fd = oldfd;
+		fd = open(path, O_RDONLY);
+	if (fd == -1)
+		put_err("Perm_Denied", path, 1, p);
 	return (fd);
 }
 
