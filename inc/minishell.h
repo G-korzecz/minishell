@@ -57,6 +57,7 @@ typedef struct s_cmd_set
 void	*put_err(char *err_type, char *param, int err, t_cmd_set *p);
 void	error_token_newline(void);
 void	*put_err_cd(char *err_type, char *path, int code, t_cmd_set *p);
+void	*put_err_syntax(char *err_msg, char *cmd, int err_code, t_cmd_set *p);
 
 /* Signal Handling */
 
@@ -119,6 +120,7 @@ void	exec_cmd_and_wait(t_cmd_set *p, int status, int tmp[2], int *is_exit);
 void	run_execve(t_cmd_set *p, t_cmd *n, t_list *cmd);
 t_cmd	*init_cmd(void);
 void	*setup_command_pipe(t_cmd_set *p, t_list *cmd);
+char	*is_invalid_syntax(char **tok, int *i);
 
 /* Builtins */
 

@@ -80,3 +80,18 @@ void	*put_err_cd(char *err_type, char *path, int code, t_cmd_set *p)
 		ft_printf_fd(2, "mini: cd: HOME not set\n");
 	return (NULL);
 }
+
+void	*put_err_syntax(char *err_msg, char *cmd, int err_code, t_cmd_set *p)
+{
+	if (p && err_code >= 0)
+		p->status_code = err_code;
+	g_exit_status = err_code;
+	if (err_msg)
+	{
+		if (!ft_strncmp(err_msg, "eof", 3))
+			ft_printf_fd(2, "mini: syntax error: unexpected end of file\n");
+		else if (!ft_strncmp(err_msg, "Unexpected_Token", 16))
+			error_unexpected_token(cmd);
+	}
+	return (NULL);
+}

@@ -51,7 +51,7 @@ t_cmd	*out_fd_truncate(t_cmd *node, char **args, int *i, t_cmd_set *p)
 		*i = -1;
 		if (node->out_fd != -1)
 		{
-			ft_putendl_fd("syntax error near unexpected token `newline'", 2);
+			error_token_newline();
 			p->status_code = 2;
 		}
 		else
@@ -74,7 +74,7 @@ t_cmd	*out_fd_append(t_cmd *node, char **args, int *i, t_cmd_set *p)
 		*i = -1;
 		if (node->out_fd != -1)
 		{
-			ft_putendl_fd("syntax error near unexpected token `newline'", 2);
+			error_token_newline();
 			p->status_code = 2;
 		}
 		else
@@ -96,7 +96,7 @@ t_cmd	*in_fd_read(t_cmd *node, char **args, int *i, t_cmd_set *p)
 	{
 		if (node->in_fd != -1)
 		{
-			ft_putendl_fd("syntax error near unexpected token `newline'", 2);
+			error_token_newline();
 			p->status_code = 2;
 		}
 		if (p && p->cmds && ft_lstsize(p->cmds) != 1)

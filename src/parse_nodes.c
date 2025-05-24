@@ -11,33 +11,6 @@
 /* ************************************************************************** */
 
 #include "../inc/minishell.h"
-/* Checks for invalid syntax patterns in the token array.
-Handles cases like redirection without argument, or invalid sequences.
-Returns a string representing the unexpected token or "newline". */
-static char	*is_invalid_syntax(char *t[], int *i)
-{
-	if (!t[*i])
-		return ("newline");
-	if ((t[*i][0] == '<' || t[*i][0] == '>') && (!t[*i + 1]))
-		return ("newline");
-	if (t[*i][0] == '<')
-	{
-		if (t[*i + 1] && t[*i + 1][0] == '|')
-			return ("|");
-		if (t[*i + 1] && t[*i + 1][0] == '<')
-		{
-			if (!t[*i + 2])
-				return ("newline");
-			if (t[*i + 2] && t[*i + 2][0] == '<')
-				return ("<");
-		}
-	}
-	if (t[*i][0] == '>' && t[*i + 1] && t[*i + 1][0] == '|')
-		return ("|");
-	if (t[*i][0] == '|' && t[*i + 1] && t[*i + 1][0] == '|')
-		return ("|");
-	return (NULL);
-}
 
 /* Processes one token at index i, checking for redirections or arguments.
 Handles append/truncate/redirect/pipe tokens and errors.
