@@ -135,6 +135,7 @@ t_cmd	*in_fd_heredoc(t_cmd *node, char **args, int *i, t_cmd_set *p)
 		*i = -1;
 		if (node->in_fd != -1)
 		{
+			ft_putstr_fd("mini :", 2);
 			ft_putendl_fd("syntax error near unexpected token `newline'", 2);
 			p->status_code = 2;
 		}

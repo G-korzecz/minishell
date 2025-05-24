@@ -65,28 +65,26 @@ static t_list	*parse_cmds(char **args, int i, t_cmd_set *p)
 {
 	t_list	*cmds[2];
 	char	**temp[2];
-	t_cmd	*tmp;
 
 	cmds[0] = NULL;
+	if (args && args[0] && args[0][0] == '|')
+		return (put_err("Unexpected_Token", "|", 2, p),
+			free_tmp_lst(NULL, args, NULL));
 	temp[1] = args_after_quotes_removed(args);
 	while (args[++i])
 	{
-		cmds[1] = ft_lstlast(cmds[0]);
 		if (i == 0 || (args[i][0] == '|' && args[i + 1] && args[i + 1][0]))
 		{
 			i += args[i][0] == '|';
 			ft_lstadd_back(&cmds[0], ft_lstnew(init_cmd()));
-			cmds[1] = ft_lstlast(cmds[0]);
 		}
+		cmds[1] = ft_lstlast(cmds[0]);
 		temp[0] = args;
-		tmp = cmds[1]->content;
-		cmds[1]->content = check_redir_pipe(tmp, temp, &i, p);
+		cmds[1]->content = check_redir_pipe(cmds[1]->content, temp, &i, p);
 		if (i < 0)
 			return (free_tmp_lst(cmds[0], args, temp[1]));
 	}
-	free_array(&temp[1]);
-	free_array(&args);
-	return (cmds[0]);
+	return (free_array(&temp[1]), free_array(&args), cmds[0]);
 }
 
 /* Parses and executes the given arguments.

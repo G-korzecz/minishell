@@ -49,12 +49,12 @@ static char	*redir_error(char **tok, int idx)
 	next = tok[idx + 1];
 	while (tok[idx + n] && tok[idx + n][0] == c)
 		n++;
+	if (c == '<' && n == 3)
+		return ("newline");
+	if (n > 2 && c == '>')
+		return (">");
 	if (n > 2)
-	{
-		if (c == '>')
-			return (">");
 		return ("<");
-	}
 	if (n == 2 && (!next || next[0] == '\0' || next[0] == '|'))
 		return ("newline");
 	if (n == 1 && (!next || is_redir(next[0]) || next[0] == '|'))

@@ -81,7 +81,7 @@ void	*put_err_cd(char *err_type, char *path, int code, t_cmd_set *p)
 	return (NULL);
 }
 
-void	*put_err_syntax(char *err_msg, char *cmd, int err_code, t_cmd_set *p)
+/*void	*put_err_syntax(char *err_msg, char *cmd, int err_code, t_cmd_set *p)
 {
 	if (p && err_code >= 0)
 		p->status_code = err_code;
@@ -94,4 +94,4 @@ void	*put_err_syntax(char *err_msg, char *cmd, int err_code, t_cmd_set *p)
 			error_unexpected_token(cmd);
 	}
 	return (NULL);
-}
+}*/
