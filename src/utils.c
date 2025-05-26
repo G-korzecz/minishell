@@ -12,28 +12,9 @@
 
 #include "../inc/minishell.h"
 
-/* Used in builtin echo to count the number of characters that are 'n' in an 
-argument of function echo.
-ex : "echo -nnnn" : countc = 4 = ft_strlen(arg[1]) - 1*/
-int	countc(char *s, char c)
-{
-	int	count;
-
-	if (!s)
-		return (0);
-	count = 0;
-	while (*s)
-	{
-		if (*s == c)
-			count++;
-		s++;
-	}
-	return (count);
-}
-
 /* Used in read_heredoc to check if heredoc delimiter (ex EOF)
 has any quotes in it, "" doesnt expand $VARIABLES.*/
-int	ft_strchrs_idx(const char *s, char *set)
+int	chrset_idx(const char *s, char *set)
 {
 	int	i;
 
@@ -53,7 +34,7 @@ int	ft_strchrs_idx(const char *s, char *set)
 Returns the index of the character if found.
 If the character is '\0', returns the length of the string.
 Returns -1 if 's' is NULL or if 'c' is not found in the string. */
-int	ft_strchr_idx(const char *s, int c)
+int	char_index(const char *s, int c)
 {
 	unsigned char	c_unsigned;
 	int				i;

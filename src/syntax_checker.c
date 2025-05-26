@@ -30,7 +30,7 @@ static char	*pipe_error(char **tok, int idx)
 	if (tok[idx][0] == '|' && idx == 0)
 		return ("|");
 	if (tok[idx][0] == '|' && (!next || next[0] == '\0'))
-		return ("newline");
+		return ("eof");
 	if (tok[idx][0] == '|' && next && next[0] == '|')
 		return ("|");
 	if (is_redir(tok[idx][0]) && next && next[0] == '|')

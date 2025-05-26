@@ -77,7 +77,7 @@ int	main(int argc, char **argv, char **envp)
 	t_cmd_set	p;
 
 	init(&p, envp, argv, argc);
-	while (1)
+	while (true)
 	{
 		disable_ctrl_z();
 		set_signals(&p);

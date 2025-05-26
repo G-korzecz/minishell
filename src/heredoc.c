@@ -98,7 +98,7 @@ int	read_heredoc(char *str[3], char *tmpstr[2], t_cmd_set *p)
 	signal(SIGQUIT, SIG_IGN);
 	if (pipe(fd) == -1)
 		return (put_err("DupForkPipe_Failed", NULL, 1, p), -1);
-	if (ft_strchrs_idx(tmpstr[0], "\"'") != -1)
+	if (chrset_idx(tmpstr[0], "\"'") != -1)
 		expand = 0;
 	tmpstr[0] = trim_all_quotes(tmpstr[0]);
 	str[1] = get_here_str(str, tmpstr[0], p);

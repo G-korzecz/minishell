@@ -23,8 +23,8 @@ int	find_env_var_index(char *var, char **envp)
 	while (envp && envp[i])
 	{
 		n2 = n;
-		if (n2 < ft_strchr_idx(envp[i], '='))
-			n2 = ft_strchr_idx(envp[i], '=');
+		if (n2 < char_index(envp[i], '='))
+			n2 = char_index(envp[i], '=');
 		if (!ft_strncmp(envp[i], var, n2))
 		{
 			return (i);
@@ -34,6 +34,7 @@ int	find_env_var_index(char *var, char **envp)
 	return (-1);
 }
 
+/* Get a specific environnement value. */
 char	*ft_getenv(char *var, char **envp)
 {
 	int			var_index;

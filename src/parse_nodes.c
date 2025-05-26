@@ -19,11 +19,11 @@ static t_cmd	*check_redir_pipe(t_cmd *t, char **a[2], int *i, t_cmd_set *p)
 {
 	char	*err;
 
-	if (!a || !a[0] || !a[0][*i])
-		return (*i = -1, put_err("Empty_Pipe", NULL, 2, p), t);
 	err = is_invalid_syntax(a[0], i);
-	if (err)
+	if (err && ft_strncmp(err, "eof", 3))
 		return (*i = -1, put_err("Unexpected_Token", err, 2, p), t);
+	else if (err)
+		return (*i = -1, put_err_syntax(err, 2, p), t);
 	if (a[0][*i][0] == '>' && a[0][*i + 1]
 		&& a[0][*i + 1][0] == '>' && g_exit_status != 130)
 		t = out_fd_append(t, a[1], i, p);
@@ -36,11 +36,6 @@ static t_cmd	*check_redir_pipe(t_cmd *t, char **a[2], int *i, t_cmd_set *p)
 		t = in_fd_read(t, a[1], i, p);
 	else if (a[0][*i][0] != '|')
 		t->args = ft_array_insert(t->args, a[1][*i]);
-	else
-	{
-		put_err("Empty_Pipe", NULL, 2, p);
-		*i = -1;
-	}
 	return (t);
 }
 

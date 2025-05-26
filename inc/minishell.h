@@ -55,9 +55,11 @@ typedef struct s_cmd_set
 /* Error Handling */
 
 void	*put_err(char *err_type, char *param, int err, t_cmd_set *p);
-void	error_token_newline(void);
 void	*put_err_cd(char *err_type, char *path, int code, t_cmd_set *p);
-void	*put_err_syntax(char *err_msg, char *cmd, int err_code, t_cmd_set *p);
+void	*put_err_syntax(char *err_msg, int err_code, t_cmd_set *p);
+void	error_token_newline(void);
+void	error_unexpected_token(char *cmd);
+void	error_unclosed_quotes(void);
 
 /* Signal Handling */
 
@@ -69,29 +71,35 @@ void	disable_ctrl_z(void);
 
 /* String and Array Manipulation */
 
-int		countc(char *s, char c);
 int		ft_arr_len(char **m);
-int		ft_strchrs_idx(const char *s, char *set);
-int		ft_strchr_idx(const char *s, int c);
+int		chrset_idx(const char *s, char *set);
+int		char_index(const char *s, int c);
 char	**ft_dup_array(char **m);
 char	**ft_array_insert(char **in, char *newstr);
-void	free_array(char ***m);
 char	**ft_array_replace(char ***big, char **small, int n);
 char	**split_and_ignore_space_if_in_quote(char *s, char *set);
 char	*remove_quotes(char const *s1, int squote, int dquote);
 char	*ft_getenv(char *var, char **envp);
 char	**ft_setenv(char *var, char *value, char **envp);
-t_list	*free_tmp_lst(t_list *cmds, char **args, char **temp);
+int		find_env_var_index(char *var, char **envp);
 
 /* Expand Variables*/
 
 char	*var_expander(char *str, int quotes[2], t_cmd_set *p);
+char	*expand_variable(char *str, int i, t_cmd_set *p, char *s[3]);
 char	*remove_dollar_quote(char *str);
-char	*var_or_path_expander(char *str, int i, t_cmd_set *p, char *s[4]);
+int		is_delim(char c);
+char	*find_substitution(char first, char *var, t_cmd_set *p);
+void	track_quotes(int *in_squote, int *in_dquote, char c);
+char	*remove_char_at(char *str, size_t pos);
 
 /* Free and Exit */
 
 void	free_exit(t_cmd_set *p, int exit_code, char *msg);
+void	free_lst(void *content);
+void	free_all(char *s1, char *s2, char *s3, char *s4);
+void	free_array(char ***m);
+t_list	*free_tmp_lst(t_list *cmds, char **args, char **temp);
 
 /* Initialisation */
 
@@ -114,28 +122,22 @@ t_cmd	*out_fd_append(t_cmd *node, char **args, int *i, t_cmd_set *p);
 t_cmd	*in_fd_read(t_cmd *node, char **args, int *i, t_cmd_set *p);
 t_cmd	*in_fd_heredoc(t_cmd *node, char **args, int *i, t_cmd_set *p);
 void	handle_env_vars(char *str, int *i, int fd[2], t_cmd_set *p);
-void	free_lst(void *content);
-void	free_all(char *s1, char *s2, char *s3, char *s4);
 void	exec_cmd_and_wait(t_cmd_set *p, int status, int tmp[2], int *is_exit);
-void	run_execve(t_cmd_set *p, t_cmd *n, t_list *cmd);
 t_cmd	*init_cmd(void);
-void	*setup_command_pipe(t_cmd_set *p, t_list *cmd);
 char	*is_invalid_syntax(char **tok, int *i);
+int		handle_builtins_exit(t_cmd_set *p, t_list *cmd, int *is_exit, int n);
+void	handle_child_builtins(t_cmd_set *p, t_cmd *n, int l, t_list *cmd);
 
 /* Builtins */
 
 int		is_builtin(t_cmd *n);
 void	builtin_exit(t_list *cmd, int *is_exit, t_cmd_set *p);
+int		builtin_exit_child(t_list *cmd);
 int		builtin_env(char **m);
 int		builtin_export(t_cmd_set *p, char **args);
 int		builtin_unset(t_cmd_set *p, char **args);
 int		builtin_pwd(void);
 int		builtin_echo(t_list *cmd);
 int		builtin_cd(t_cmd_set *p, char **cmd_args);
-int		handle_builtins_exit(t_cmd_set *p, t_list *cmd, int *is_exit, int n);
-void	handle_child_builtins(t_cmd_set *p, t_cmd *n, int l, t_list *cmd);
-void	set_signals(t_cmd_set *p);
-int		find_env_var_index(char *var, char **envp);
-int		builtin_exit_child(t_list *cmd);
 
 #endif

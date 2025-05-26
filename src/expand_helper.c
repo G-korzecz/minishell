@@ -12,53 +12,16 @@
 
 #include "../inc/minishell.h"
 
-static char	*find_substitution(char first, char *var, t_cmd_set *p)
+/*Helper that ensures tilde expansion only happens when ~ 
+is at the start of a standalone word.*/
+int	is_delim(char c)
 {
-	char	*val;
-
-	val = NULL;
-	if (first == '?')
-	{
-		if (g_exit_status > 0)
-		{
-			p->status_code = g_exit_status;
-			g_exit_status = 0;
-		}
-		val = ft_itoa(p->status_code);
-	}
-	else if (var)
-		val = ft_getenv(var, p->envp);
-	free(var);
-	if (!val)
-		val = ft_strdup("");
-	return (val);
+	return (c == ' ' || c == '\t' || c == ':' || c == '='
+		|| c == '/' || c == '\0');
 }
 
-char	*var_or_path_expander(char *str, int i, t_cmd_set *p, char *s[4])
-{
-	int		j;
-	char	*res;
-	char	*prefix;
-	char	*suffix;
-
-	j = 0;
-	if (str[i] == '?')
-		j = 1;
-	else
-		while (str[i + j] && (ft_isalnum(str[i + j]) || str[i + j] == '_'))
-			j++;
-	s[0] = ft_substr(str, i, j);
-	s[1] = find_substitution(str[i], s[0], p);
-	prefix = ft_substr(str, 0, i - 1);
-	suffix = ft_strdup(&str[i + j]);
-	s[2] = ft_strjoin(prefix, s[1]);
-	res = ft_strjoin(s[2], suffix);
-	free_all(prefix, suffix, s[1], s[2]);
-	free(str);
-	return (var_expander(res, (int [2]){0, 0}, p));
-}
-
-static void	update_quote(int *in_squote, int *in_dquote, char c)
+/*Make sure $ before quotes is only removed if it's not inside other quotes.*/
+void	track_quotes(int *in_squote, int *in_dquote, char c)
 {
 	if (c == '\'' && *in_dquote == 0)
 	{
@@ -67,7 +30,7 @@ static void	update_quote(int *in_squote, int *in_dquote, char c)
 		else
 			*in_squote = 0;
 	}
-	else if (c == '"' && *in_squote == 0)
+	else if (c == '\"' && *in_squote == 0)
 	{
 		if (*in_dquote == 0)
 			*in_dquote = 1;
@@ -77,7 +40,7 @@ static void	update_quote(int *in_squote, int *in_dquote, char c)
 }
 
 /* Remove the character at index pos and return a new malloc-ated string.*/
-static char	*remove_char_at(char *str, size_t pos)
+char	*remove_char_at(char *str, size_t pos)
 {
 	char	*left;
 	char	*right;
@@ -92,7 +55,8 @@ static char	*remove_char_at(char *str, size_t pos)
 	return (tmp);
 }
 
-/* Delete the ‘$’ that introduces $'ansi' or $"gettext" quoting
+/* Delete the ‘$’ before quotes.
+echo $"USER" = USER and not $USER
 only when we are *outside* any existing quote context.*/
 char	*remove_dollar_quote(char *str)
 {
@@ -105,7 +69,7 @@ char	*remove_dollar_quote(char *str)
 	in_dquote = 0;
 	while (str && str[i])
 	{
-		update_quote(&in_squote, &in_dquote, str[i]);
+		track_quotes(&in_squote, &in_dquote, str[i]);
 		if (in_squote == 0 && in_dquote == 0 && str[i] == '$'
 			&& (str[i + 1] == '\'' || str[i + 1] == '"'))
 			return (remove_char_at(str, i));

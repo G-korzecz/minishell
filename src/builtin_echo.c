@@ -12,7 +12,26 @@
 
 #include "../inc/minishell.h"
 
-/* First check if -n (or -nnnn is present) via countc and flag print_newline
+/* Used in builtin echo to count the number of characters that are 'n' in an 
+argument of function echo.
+ex : "echo -nnnn" : c_count = 4 = ft_strlen(arg[1]) - 1*/
+int	c_count(char *s, char c)
+{
+	int	count;
+
+	if (!s)
+		return (0);
+	count = 0;
+	while (*s)
+	{
+		if (*s == c)
+			count++;
+		s++;
+	}
+	return (count);
+}
+
+/* First check if -n (or -nnnn is present) via c_count and flag print_newline
 j is flag to check if we started printing or not. Start at arg[1].
 Print every arg with one and only one space between them.*/
 int	builtin_echo(t_list *cmd)
@@ -28,7 +47,7 @@ int	builtin_echo(t_list *cmd)
 	args = ((t_cmd *)cmd->content)->args;
 	while (args && args[++i])
 	{
-		if (!j && !ft_strncmp(args[i], "-n", 2) && (countc(args[i],
+		if (!j && !ft_strncmp(args[i], "-n", 2) && (c_count(args[i],
 					'n') == (int)(ft_strlen(args[i]) - 1)))
 			print_newline = 0;
 		else

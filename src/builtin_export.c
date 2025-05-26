@@ -17,7 +17,7 @@ static int	var_in_envp(char *arg, char **envp, int *idx)
 	int	pos;
 
 	*idx = 0;
-	pos = ft_strchr_idx(arg, '=');
+	pos = char_index(arg, '=');
 	if (pos == -1)
 		return (-1);
 	while (envp[*idx])
@@ -83,20 +83,22 @@ static void	print_export(char **envp)
 
 	sort_env(envp, ft_arr_len(envp));
 	i = 0;
-	while (envp[i])
+	while (envp && envp[i])
 	{
-		pos = ft_strchr_idx(envp[i], '=');
+		pos = char_index(envp[i], '=');
 		if (pos == -1)
-			ft_printf_fd(1, "declare -x %s\n", envp[i]);
+			key = ft_strdup(envp[i]);
 		else
-		{
 			key = ft_substr(envp[i], 0, pos);
-			ft_printf_fd(1,
-				"declare -x %s=\"%s\"\n",
-				key,
-				envp[i] + pos + 1);
-			free(key);
+		if (key && ft_strcmp(key, "_"))
+		{
+			if (pos == -1)
+				ft_printf_fd(1, "declare -x %s\n", key);
+			else
+				ft_printf_fd(1, "declare -x %s=\"%s\"\n",
+					key, envp[i] + pos + 1);
 		}
+		free(key);
 		i++;
 	}
 }

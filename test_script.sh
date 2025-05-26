@@ -42,3 +42,21 @@ echo "/bin/echo Hello from here" > test.sh
 chmod +x test.sh
 /bin/sh ./test.sh
 /bin/sh ./minishell/test.sh
+
+# Create two directories
+mkdir -p dir1 dir2
+
+# Create two scripts with the same name, different output
+/bin/echo -e '#!/bin/sh\necho "from dir1"' > dir1/mycmd
+/bin/echo -e '#!/bin/sh\necho "from dir2"' > dir2/mycmd
+
+# Make both scripts executable
+chmod +x dir1/mycmd dir2/mycmd
+
+# Set PATH to search dir1 first
+export PATH="$PWD/dir1:$PWD/dir2"
+mycmd  # Expected: from dir1
+
+# Reverse the PATH order
+export PATH="$PWD/dir2:$PWD/dir1"
+mycmd  # Expected: from dir2

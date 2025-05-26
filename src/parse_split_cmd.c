@@ -54,7 +54,7 @@ static int	size_to_malloc(char *s, char *set, int count)
 	return (count);
 }
 
-static char	**ft_add_to_array(char **tmpstr, char *s, char *set, int i[3])
+static char	**add_to_array(char **tmpstr, char *s, char *set, int i[3])
 {
 	int	q[2];
 
@@ -96,7 +96,7 @@ char	**ft_split_with_pipe_or_redir_char(char const *s, char *set)
 	tmp = malloc((word_count + 1) * sizeof(char *));
 	if (tmp == NULL)
 		return (NULL);
-	tmp = ft_add_to_array(tmp, (char *)s, set, i);
+	tmp = add_to_array(tmp, (char *)s, set, i);
 	tmp[word_count] = NULL;
 	return (tmp);
 }

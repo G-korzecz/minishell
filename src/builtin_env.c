@@ -27,7 +27,7 @@ int	builtin_env(char **envp)
 	}
 	while (envp[i] != NULL)
 	{
-		if (envp[i][0] != '_' && ft_strchr(envp[i], '='))
+		if (ft_strchr(envp[i], '='))
 			printf("%s\n", envp[i]);
 		i++;
 	}

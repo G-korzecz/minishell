@@ -40,7 +40,7 @@ static int	ft_count_tokens(const char *s, char *c, int i[2])
 	return (i[1]);
 }
 
-static char	**ft_add_to_arr(char **tmpstr, char *s, char *set, int i[3])
+static char	**ft_split_with_quotes(char **tmpstr, char *s, char *set, int i[3])
 {
 	int	s_len;
 	int	q[2];
@@ -87,7 +87,7 @@ char	**split_and_ignore_space_if_in_quote(char *s, char *set)
 	tmpstr = malloc((nwords + 1) * sizeof(char *));
 	if (tmpstr == NULL)
 		return (put_err(NULL, "Malloc failed", 1, NULL), NULL);
-	tmpstr = ft_add_to_arr(tmpstr, s, set, i);
+	tmpstr = ft_split_with_quotes(tmpstr, s, set, i);
 	tmpstr[nwords] = NULL;
 	return (tmpstr);
 }
