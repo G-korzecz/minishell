@@ -12,7 +12,9 @@
 
 #include "../inc/minishell.h"
 
-/* helper func for find_command func, to join the path with the cmd to a str */
+/*Duplicate dir into temp_dir, append "/" to it
+then append the command.
+free temp and return cmd_path*/
 static char	*build_cmd_path(const char *dir, const char *cmd)
 {
 	char	*temp_dir;
@@ -33,6 +35,12 @@ static char	*build_cmd_path(const char *dir, const char *cmd)
 	return (cmd_path);
 }
 
+/* Loops through env variable to check if the command is in a path of $PATH
+Call build command path each time (append '/' cmd)
+so it search for access to cmd_path and if execution is possible.
+Free the path each time to check for next one.
+if nothing is found in $PATH fall back to "." which is current directory.
+lately if nothing found return NULL and launch error no_cmd in process_check*/
 char	*find_command(char **env_path, char *cmd, char *cmd_path)
 {
 	int		i;
@@ -55,6 +63,15 @@ char	*find_command(char **env_path, char *cmd, char *cmd_path)
 	return (NULL);
 }
 
+/* check a naked command which is not a builtin (type ls) 
+if empty (ex : "   ") error :No_CMD
+Split the $PATH variable into an array:
+[0] : /usr/bin
+[1] : /usr/sbin
+....
+call find command
+if nothing found and last command error code 127
+else 0 (executed in child)*/
 static void	process_checks(t_list *cmd, char *path, t_cmd_set *p, char ***s)
 {
 	t_cmd	*n;
@@ -76,7 +93,12 @@ static void	process_checks(t_list *cmd, char *path, t_cmd_set *p, char ***s)
 	}
 }
 
-/* if the cmd starts with / and is not a directory, save it as cmd path */
+/* Try opendir to check if the cmd entered is a directory
+if not and contain a '/' store a copy into cmd_path
+and replace arg[0] with the command /bin/ls -> ls
+if not fallback to process_check.
+if the cmd is not a directory, dir is null and conditions in
+find_cmd_path will be false.*/
 static DIR	*cmd_checks(t_list *cmd, char ***s, char *path, t_cmd_set *p)
 {
 	t_cmd	*n;
@@ -99,9 +121,10 @@ static DIR	*cmd_checks(t_list *cmd, char ***s, char *path, t_cmd_set *p)
 	return (dir);
 }
 
-/* calls cmd_checks func which checks and returns if cmd is a directory.
-	if it's not builtin func: if it's a file and checks for permissions
-						if a directory shows "is a directory" error */
+/*Main cmd_path_checker.
+Throw errors in function of cmd_check.
+First get the env variable PATH from p->envp
+Close dir if opened before (non NULL).*/
 void	find_cmd_path(t_cmd_set *p, t_list *cmd, char **s, char *path)
 {
 	t_cmd	*n;

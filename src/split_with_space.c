@@ -12,7 +12,15 @@
 
 #include "../inc/minishell.h"
 
-static int	ft_count_tokens(const char *s, char *c, int i[2])
+/* Count the number of token the input string should produce.
+i[0] is the index as you scan s
+i[1] is the number of tokens found so far.
+As usual quotes tracking via q[0] and q[1], with a change :
+q[1] hold here 0 : if not in any quote
+34 : double quote
+39 : single quote
+while we are in quotes, count as one token*/
+static int	token_counter(const char *s, char *c, int i[2])
 {
 	int	q[2];
 
@@ -40,7 +48,13 @@ static int	ft_count_tokens(const char *s, char *c, int i[2])
 	return (i[1]);
 }
 
-static char	**ft_split_with_quotes(char **tmpstr, char *s, char *set, int i[3])
+/* Besides classic quotes handling :
+first while : skips space before token, i[0] store the position of token
+and store it in i[1].
+Advance until next space(if not in quotes)
+i[2] : token index
+Defensive empty token "\0" if we go beyond input.*/
+static char	**split_with_quotes(char **tmpstr, char *s, char *set, int i[3])
 {
 	int	s_len;
 	int	q[2];
@@ -67,6 +81,10 @@ static char	**ft_split_with_quotes(char **tmpstr, char *s, char *set, int i[3])
 	return (tmpstr);
 }
 
+/* Pre-tokenizer
+Count token for spliting.
+Malloc the right number of *str (+1 for NULL)
+Actual spliting.*/
 char	**split_and_ignore_space_if_in_quote(char *s, char *set)
 {
 	char	**tmpstr;
@@ -81,13 +99,13 @@ char	**split_and_ignore_space_if_in_quote(char *s, char *set)
 	counts[1] = 0;
 	if (!s)
 		return (NULL);
-	nwords = ft_count_tokens(s, set, counts);
+	nwords = token_counter(s, set, counts);
 	if (nwords == -1)
 		return (NULL);
 	tmpstr = malloc((nwords + 1) * sizeof(char *));
 	if (tmpstr == NULL)
 		return (put_err(NULL, "Malloc failed", 1, NULL), NULL);
-	tmpstr = ft_split_with_quotes(tmpstr, s, set, i);
+	tmpstr = split_with_quotes(tmpstr, s, set, i);
 	tmpstr[nwords] = NULL;
 	return (tmpstr);
 }

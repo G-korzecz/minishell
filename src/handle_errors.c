@@ -42,11 +42,17 @@ void	*put_err(char *err_msg, char *cmd, int err_code, t_cmd_set *p)
 	return (NULL);
 }
 
+/* Same for cd builtin */
 void	*put_err_cd(char *err_type, char *path, int code, t_cmd_set *p)
 {
 	if (p && code >= 0)
 		p->status_code = code;
 	g_exit_status = code;
+	if (err_type && !ft_strncmp(err_type, "HOME_Not_Set", 12))
+	{
+		ft_putendl_fd("mini: cd: HOME not set", 2);
+		return (NULL);
+	}
 	if (!err_type || !path || !path[0])
 		return (NULL);
 	if (!ft_strncmp(err_type, "NoFile_NoDir", 12))
@@ -55,11 +61,10 @@ void	*put_err_cd(char *err_type, char *path, int code, t_cmd_set *p)
 		ft_printf_fd(2, "mini: cd: %s: Permission denied\n", path);
 	else if (!ft_strncmp(err_type, "Not_Directory", 13))
 		ft_printf_fd(2, "mini: cd: %s: Not a directory\n", path);
-	else if (!ft_strncmp(err_type, "HOME_Not_Set", 12))
-		ft_printf_fd(2, "mini: cd: HOME not set\n");
 	return (NULL);
 }
 
+/* Same for syntax errors.*/
 void	*put_err_syntax(char *err_msg, int err_code, t_cmd_set *p)
 {
 	if (p && err_code >= 0)

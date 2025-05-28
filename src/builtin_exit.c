@@ -61,15 +61,15 @@ int	parse_strict_ll(const char *str, long long *out)
 /* Builtin exit for parent context
 Handles `exit` command with numeric validation, overflow detection,
 error messaging, and proper status code truncation. */
-void	builtin_exit(t_list *cmd, int *is_exit, t_cmd_set *p)
+void	builtin_exit(t_list *cmd, t_cmd_set *p)
 {
 	long long	status;
 	char		**args;
+	int			is_exit;
 
+	is_exit = 0;
 	args = ((t_cmd *)cmd->content)->args;
-	*is_exit = !cmd->next;
-	/*if (*is_exit && ft_lstsize(p->cmds) == 1)
-		ft_putendl_fd("exit", 1);*/
+	/*ft_putendl_fd("exit", 1);*/
 	if (!args || !args[1])
 		free_exit(p, 0, NULL);
 	if (!parse_strict_ll(args[1], &status))
@@ -79,10 +79,10 @@ void	builtin_exit(t_list *cmd, int *is_exit, t_cmd_set *p)
 	}
 	if (args[2])
 	{
-		*is_exit = 0;
 		put_err(NULL, "exit: too many arguments", 1, 0);
+		is_exit = 1;
 	}
-	if (*is_exit)
+	if (is_exit == 0)
 		free_exit(p, status & 255, NULL);
 }
 

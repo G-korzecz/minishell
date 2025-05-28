@@ -12,6 +12,7 @@
 
 #include "../inc/minishell.h"
 
+/* Init one command that will be linked into a chained list.*/
 t_cmd	*init_cmd(void)
 {
 	t_cmd	*cmd;
@@ -26,6 +27,9 @@ t_cmd	*init_cmd(void)
 	return (cmd);
 }
 
+/* i : current index
+Normal quotes checking, if inside quotes it's only one token
+note that ">>" is counted as two tokens.*/
 static int	size_to_malloc(char *s, char *set, int count)
 {
 	int	q[2];
@@ -54,6 +58,16 @@ static int	size_to_malloc(char *s, char *set, int count)
 	return (count);
 }
 
+/* ft_substr(s, i[1], i[0] - i[1]) : Allocates a new copy
+starts at s + i[1] and is i[0]-i[1] characters long. 
+In the current loop those indices delimit the token
+we have just finished scanning.
+tmpstr[ i[2] ] = append to the existing array
+that size been determined by size_to_malloc
+i[2]++ (post-increment)	advance the write cursor.
+i[0] = current scan index
+i[1] = token start
+i[2] = token counter*/
 static char	**add_to_array(char **tmpstr, char *s, char *set, int i[3])
 {
 	int	q[2];
@@ -79,6 +93,12 @@ static char	**add_to_array(char **tmpstr, char *s, char *set, int i[3])
 	return (tmpstr);
 }
 
+/*Initialize 3 indexs :
+i[0] = current scan index
+i[1] = token start
+i[2] = token counter
+Use size_to_malloc to check for the actual size of the array after spliting (wc)
+use add_to_arry to put the actual tokens in.*/
 char	**ft_split_with_pipe_or_redir_char(char const *s, char *set)
 {
 	char	**tmp;
@@ -101,6 +121,16 @@ char	**ft_split_with_pipe_or_redir_char(char const *s, char *set)
 	return (tmp);
 }
 
+/* Main splitter for special char "<|>"
+Create an array of tokens :
+echo "hey" | test > ouptut.txt "ramdombulsh*t cat ls -l"
+[0] echo
+[1] "hey"
+[2] |
+[4] test
+[3] >
+[4] output.txt
+[5] "ramdombulsh*t cat ls -l"*/
 char	**split_with_special_chars(char **args)
 {
 	char	**subsplit;

@@ -12,34 +12,50 @@
 
 #include "../inc/minishell.h"
 
-int	is_builtin(t_cmd *n)
+/* Handles parent builtin in the case of only one command
+and so the enviroment of the whole shell should be modified
+ie cd/exit/unset/export.
+Else loops through all command and continue the process of
+fork/pipe.*/
+int	exec_par_builtins(t_cmd_set *p, t_list *cmd, int n)
 {
-	int	len;
+	char	**a;
+	int		s;
+	int		one;
 
-	if (!n->args)
-		return (0);
-	if ((n->args && ft_strchr(*n->args, '/')) || (n->cmd_path
-			&& ft_strchr(n->cmd_path, '/')))
-		return (0);
-	len = ft_strlen(*n->args);
-	if (!ft_strncmp(*n->args, "pwd", len) && len == 3)
-		return (1);
-	if (!ft_strncmp(*n->args, "env", len) && len == 3)
-		return (1);
-	if (!ft_strncmp(*n->args, "cd", len) && len == 2)
-		return (1);
-	if (!ft_strncmp(*n->args, "export", len) && len == 6)
-		return (1);
-	if (!ft_strncmp(*n->args, "unset", len) && len == 5)
-		return (1);
-	if (!ft_strncmp(*n->args, "echo", len) && len == 4)
-		return (1);
-	if (!ft_strncmp(*n->args, "exit", len) && len == 4)
-		return (1);
-	return (0);
+	s = 0;
+	one = ft_lstsize(p->cmds) == 1;
+	while (cmd)
+	{
+		a = ((t_cmd *)cmd->content)->args;
+		n = 0;
+		if (a)
+			n = ft_strlen(*a);
+		if (a && n == 4 && !ft_strncmp(*a, "exit", 4) && one)
+			builtin_exit(cmd, p);
+		else if (a && n == 2 && !ft_strncmp(*a, "cd", 2) && one)
+			s = builtin_cd(p, a);
+		else if (a && n == 6 && !ft_strncmp(*a, "export", 6) && one)
+			s = builtin_export(p, a);
+		else if (a && n == 5 && !ft_strncmp(*a, "unset", 5) && one)
+			s = builtin_unset(p, a);
+		else
+			setup_pipe_and_fork_cmd(p, cmd);
+		cmd = cmd->next;
+	}
+	return (s);
 }
 
-void	*forked_builtins_and_rest(t_cmd_set *p, t_list *cmd)
+/* Create both fd (in/out)
+SIGINT and SIGQUIT will be handled by signal_child
+Call find cmd_path to resolve binnaries path finding :
+Fill the cmd with its path and name...
+Create the pipe, if it fails put_err
+Call 
+Close the parent writing end (doesnt need to write)
+Close fd[0] only if the current command not connected to the next.
+Close all custom in/out fd's created by the redirs, append...*/
+void	*setup_pipe_and_fork_cmd(t_cmd_set *p, t_list *cmd)
 {
 	int	fd[2];
 
@@ -62,36 +78,7 @@ void	*forked_builtins_and_rest(t_cmd_set *p, t_list *cmd)
 	return (NULL);
 }
 
-int	handle_builtins_exit(t_cmd_set *p, t_list *cmd, int *is_exit, int n)
-{
-	char	**a;
-	int		s;
-	int		one;
-
-	s = 0;
-	one = ft_lstsize(p->cmds) == 1;
-	while (cmd)
-	{
-		a = ((t_cmd *)cmd->content)->args;
-		n = 0;
-		if (a)
-			n = ft_strlen(*a);
-		if (a && n == 4 && !ft_strncmp(*a, "exit", 4) && one)
-			builtin_exit(cmd, is_exit, p);
-		else if (a && n == 2 && !ft_strncmp(*a, "cd", 2) && one)
-			s = builtin_cd(p, a);
-		else if (a && n == 6 && !ft_strncmp(*a, "export", 6) && one)
-			s = builtin_export(p, a);
-		else if (a && n == 5 && !ft_strncmp(*a, "unset", 5) && one)
-			s = builtin_unset(p, a);
-		else
-			forked_builtins_and_rest(p, cmd);
-		cmd = cmd->next;
-	}
-	return (s);
-}
-
-void	handle_child_builtins(t_cmd_set *p, t_cmd *n, int l, t_list *cmd)
+void	exec_child_builtins(t_cmd_set *p, t_cmd *n, int l, t_list *cmd)
 {
 	signal(SIGINT, signals_child);
 	signal(SIGQUIT, signals_child);

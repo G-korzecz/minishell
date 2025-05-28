@@ -12,9 +12,23 @@
 
 #include "../inc/minishell.h"
 
-void	exec_cmd_and_wait(t_cmd_set *p, int status, int tmp[2], int *is_exit)
+/* Calls exec_parent_builtin first to handle cd/export/unset/exit
+continue through that.
+Ignore SIGINT/SIGQUIT in parent until everything is finished.
+If only one cmd (cd/export/unset/exit) status code is saved immediatly.
+Wait for the last forked command to finish.
+Wait for any other child process to finish.
+WIFSIGNALED(status) checked how the child terminated after wait.
+WTERMSIG(status) Returns the signal number that caused child to terminate.
+WIFEXITED(status) return true if child exit normally (using exit for example)
+command not found
+exited normally
+fallback.
+in case of broken piping (yes | head -n 1) the status code should be 0
+else if interuped by ctrl + c, it should be 128 + 2 = 13.*/
+void	exec_cmd_and_wait(t_cmd_set *p, int status, int tmp[2])
 {
-	tmp[1] = handle_builtins_exit(p, p->cmds, is_exit, 0);
+	tmp[1] = exec_par_builtins(p, p->cmds, 0);
 	if (ft_lstsize(p->cmds) == 1)
 		p->status_code = tmp[1];
 	signal(SIGINT, SIG_IGN);
@@ -41,6 +55,14 @@ void	exec_cmd_and_wait(t_cmd_set *p, int status, int tmp[2], int *is_exit)
 	p->status_code = p->status_code & 255;
 }
 
+/* Piping/redir fd's redirection.
+example : echo "hey" > output.txt
+echo writes to stdout, duping it to fd = 3 makes it writes
+to output instead.
+First remap in_fd
+Then out_fd
+If there is a pipe command, redirect stdout to the pipe’s write end.
+Close the write end of pipe.*/
 static void	*dup_io_fds(t_list *cmd, int fd[2])
 {
 	t_cmd	*node;
@@ -67,6 +89,11 @@ static void	*dup_io_fds(t_list *cmd, int fd[2])
 	return (NULL);
 }
 
+/* Sets up the correct in/out redirections or pipes
+Executes the command (builtin or binary)
+Cleans up and exits with the proper status.
+exec_child_builtins(p, n, l, cmd); execute the actual cmd
+Don't forget to free all memory after exiting.*/
 void	*exec_in_child(t_cmd_set *p, t_list *cmd, int fd[2])
 {
 	t_cmd	*n;
@@ -78,7 +105,7 @@ void	*exec_in_child(t_cmd_set *p, t_list *cmd, int fd[2])
 		l = ft_strlen(*n->args);
 	dup_io_fds(cmd, fd);
 	close(fd[0]);
-	handle_child_builtins(p, n, l, cmd);
+	exec_child_builtins(p, n, l, cmd);
 	if (cmd->next != NULL)
 		p->status_code = 0;
 	l = p->status_code;
@@ -89,6 +116,11 @@ void	*exec_in_child(t_cmd_set *p, t_list *cmd, int fd[2])
 	exit(l);
 }
 
+/* pid store the result of fork.
+if there is no next command and we're in parent process
+save the pid in pid_of_lst_cmd.
+if pid < 0 forking has failed, close fd's and throw error
+Else continue with execution.*/
 void	create_fork(t_cmd_set *p, t_list *cmd, int fd[2])
 {
 	pid_t	pid;
@@ -110,6 +142,12 @@ void	create_fork(t_cmd_set *p, t_list *cmd, int fd[2])
 		exec_in_child(p, cmd, fd);
 }
 
+/* Try open dir to check if its a directory
+If in/out fd are invalid, skip execution
+if access to the command or is_builtin, continue to forking.
+If directory or not executable throw 126.
+else throw 127.
+Return a non-NULL string to significate succes.*/
 void	*chk_perm_call_child(t_cmd_set *p, t_list *cmd, int fd[2])
 {
 	t_cmd	*n;

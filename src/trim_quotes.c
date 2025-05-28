@@ -12,6 +12,9 @@
 
 #include "../inc/minishell.h"
 
+/* As always, inside quotes checker.
+Calculate exactly of many spaces need to be removed for the new malloc.
+Check if quotes are not closed (security as it's already done before)*/
 static int	check_quotes_get_len(char const *s1)
 {
 	int	count;
@@ -36,6 +39,9 @@ static int	check_quotes_get_len(char const *s1)
 	return (count);
 }
 
+/* If the character is not a quote, or it's a quote inside the other kind
+(i.e  single quote inside "double"') -> keep it.
+Otherwise (it's an outer quote character), skip it*/
 char	*remove_quotes(char const *s1, int squote, int dquote)
 {
 	int		i;

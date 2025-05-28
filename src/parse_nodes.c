@@ -14,7 +14,7 @@
 
 /* Processes one token at index i, checking for redirections or arguments.
 Handles append/truncate/redirect/pipe tokens and errors.
-Updates the command list or prints an error if invalid. */
+Updates the command list or prints an error if invalid.*/
 static t_cmd	*check_redir_pipe(t_cmd *t, char **a[2], int *i, t_cmd_set *p)
 {
 	char	*err;
@@ -39,6 +39,7 @@ static t_cmd	*check_redir_pipe(t_cmd *t, char **a[2], int *i, t_cmd_set *p)
 	return (t);
 }
 
+/* Create the array with argument without quotes for concrete building.	*/
 static char	**args_after_quotes_removed(char **args)
 {
 	char	**temp;
@@ -56,6 +57,13 @@ static char	**args_after_quotes_removed(char **args)
 	return (temp);
 }
 
+/* Actual list builders that will give a chaine list of command to t_cmd_set.
+temp[0] : actual array with quotes
+temp[1] : without quotes (useed for storing)
+cmds[0] head of list (that will be returned)
+cmds[1] : actual command being processed
+if we encounter a pipe, and a command is after, create a new cmd
+cmds[1] = ft_lstlast(cmds[0]); append it at the end of list*/
 static t_list	*parse_cmds(char **args, int i, t_cmd_set *p)
 {
 	t_list	*cmds[2];
@@ -88,11 +96,9 @@ Sets the $_ variable and calls exec_cmd_and_wait.
 Returns the original pointer after execution. */
 void	*parse_nodes(char **args, t_cmd_set *p)
 {
-	int	is_exit;
 	int	status;
 	int	tmp[2];
 
-	is_exit = 0;
 	status = 0;
 	tmp[0] = -1;
 	tmp[1] = -1;
@@ -103,13 +109,6 @@ void	*parse_nodes(char **args, t_cmd_set *p)
 		&& ft_arr_len(((t_cmd *)(p->cmds->content))->args))
 		ft_setenv("_", ((t_cmd *)(p->cmds->content))->args[ft_arr_len(((t_cmd *)
 					(p->cmds->content))->args) - 1], p->envp);
-	exec_cmd_and_wait(p, status, tmp, &is_exit);
-	if (is_exit)
-		free_exit(p, p->status_code, NULL);
-	if (p->cmds && is_exit)
-	{
-		ft_lstclear(&p->cmds, free_lst);
-		return (NULL);
-	}
+	exec_cmd_and_wait(p, status, tmp);
 	return (p);
 }

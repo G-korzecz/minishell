@@ -12,20 +12,23 @@
 
 #include "../inc/minishell.h"
 
+/* Find a specific environnement variable var in envp
+iterate through whole env and return the index of the var
+if found or -1 if nothing found.*/
 int	find_env_var_index(char *var, char **envp)
 {
 	int	i;
 	int	n;
-	int	n2;
+	int	k;
 
 	i = 0;
 	n = ft_strlen(var);
 	while (envp && envp[i])
 	{
-		n2 = n;
-		if (n2 < char_index(envp[i], '='))
-			n2 = char_index(envp[i], '=');
-		if (!ft_strncmp(envp[i], var, n2))
+		k = n;
+		if (k < char_index(envp[i], '='))
+			k = char_index(envp[i], '=');
+		if (!ft_strncmp(envp[i], var, k))
 		{
 			return (i);
 		}
@@ -34,7 +37,11 @@ int	find_env_var_index(char *var, char **envp)
 	return (-1);
 }
 
-/* Get a specific environnement value. */
+/* Get a specific environnement value. 
+if var is empty return '$' (empty var)
+if found find_env go through var till '=' found (if not reutnr NULL)
+increment one time so it point to the first char after '='
+return a duplicate of it*/
 char	*ft_getenv(char *var, char **envp)
 {
 	int			var_index;
@@ -56,6 +63,9 @@ char	*ft_getenv(char *var, char **envp)
 	return (NULL);
 }
 
+/* Set or update an environement variable.
+if it exist, replace it with a new value.
+if not create the new variable and insert it via ft_array_insert*/
 char	**ft_setenv(char *var, char *value, char **envp)
 {
 	int		index;

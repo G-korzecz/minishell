@@ -27,13 +27,19 @@
 # include <stdarg.h>
 # include <stdbool.h>
 # include <errno.h>
+# include <sys/stat.h>	
 
 /* Used to store the exit status of last command used
-Also used with CTRL + D | CTRL + C | CTRL + / */
+Extern so any function can use it (global variable)
+Use volatile to ensure that even if the variable is modified
+by signals i must not be optimized by the program
+sig_atomic_t : basically modified in only ONE operation.*/
 extern volatile sig_atomic_t	g_exit_status;
 
-/* struct which are saved in the content of a linked list for each command
-    cmd options(args), cmd_path, in_fd, output_pd */
+/* Struct which are saved in the content of a linked list for each command
+args : [0] : cmd_name, [1]...[end] = NULL arguments as per execve execution.
+path for exeve
+in fd/out fd > redirection, piping...*/
 typedef struct s_cmd
 {
 	char	**args;
@@ -42,7 +48,11 @@ typedef struct s_cmd
 	int		out_fd;
 }			t_cmd;
 
-/* struct with envp, status_code and pointer to linked list of cmds */
+/* Main structure, hold the chaine list of command
+all env variables
+the input text
+status_code
+pid of the last command.*/
 typedef struct s_cmd_set
 {
 	t_list	*cmds;
@@ -60,6 +70,7 @@ void	*put_err_syntax(char *err_msg, int err_code, t_cmd_set *p);
 void	error_token_newline(void);
 void	error_unexpected_token(char *cmd);
 void	error_unclosed_quotes(void);
+void	error_delim_heredoc(char *lim);
 
 /* Signal Handling */
 
@@ -79,6 +90,9 @@ char	**ft_array_insert(char **in, char *newstr);
 char	**ft_array_replace(char ***big, char **small, int n);
 char	**split_and_ignore_space_if_in_quote(char *s, char *set);
 char	*remove_quotes(char const *s1, int squote, int dquote);
+
+/* Environement manipulation */
+
 char	*ft_getenv(char *var, char **envp);
 char	**ft_setenv(char *var, char *value, char **envp);
 int		find_env_var_index(char *var, char **envp);
@@ -92,6 +106,7 @@ int		is_delim(char c);
 char	*find_substitution(char first, char *var, t_cmd_set *p);
 void	track_quotes(int *in_squote, int *in_dquote, char c);
 char	*remove_char_at(char *str, size_t pos);
+void	remove_curly_brackets(char **s, int i[3], int quotes[2], char *tmp[3]);
 
 /* Free and Exit */
 
@@ -112,7 +127,6 @@ void	*process_input(char *out, t_cmd_set *p);
 void	process_heredoc(char **s, int i[3], int quotes[2], char *tmp[3]);
 void	handle_input(char **input, int i[3], int quotes[2], t_cmd_set *p);
 int		update_quotes_chk_heredoc(int *quo, char ch, int i[3], char **s);
-void	remove_curly_brackets(char **s, int i[3], int quotes[2], char *tmp[3]);
 void	find_cmd_path(t_cmd_set *p, t_list *cmd, char **s, char *path);
 void	*chk_perm_call_child(t_cmd_set *p, t_list *cmd, int fd[2]);
 void	*parse_nodes(char **args, t_cmd_set *p);
@@ -122,16 +136,17 @@ t_cmd	*out_fd_append(t_cmd *node, char **args, int *i, t_cmd_set *p);
 t_cmd	*in_fd_read(t_cmd *node, char **args, int *i, t_cmd_set *p);
 t_cmd	*in_fd_heredoc(t_cmd *node, char **args, int *i, t_cmd_set *p);
 void	handle_env_vars(char *str, int *i, int fd[2], t_cmd_set *p);
-void	exec_cmd_and_wait(t_cmd_set *p, int status, int tmp[2], int *is_exit);
+void	exec_cmd_and_wait(t_cmd_set *p, int status, int tmp[2]);
 t_cmd	*init_cmd(void);
 char	*is_invalid_syntax(char **tok, int *i);
-int		handle_builtins_exit(t_cmd_set *p, t_list *cmd, int *is_exit, int n);
-void	handle_child_builtins(t_cmd_set *p, t_cmd *n, int l, t_list *cmd);
+int		exec_par_builtins(t_cmd_set *p, t_list *cmd, int n);
+void	*setup_pipe_and_fork_cmd(t_cmd_set *p, t_list *cmd);
+void	exec_child_builtins(t_cmd_set *p, t_cmd *n, int l, t_list *cmd);
 
 /* Builtins */
 
 int		is_builtin(t_cmd *n);
-void	builtin_exit(t_list *cmd, int *is_exit, t_cmd_set *p);
+void	builtin_exit(t_list *cmd, t_cmd_set *p);
 int		builtin_exit_child(t_list *cmd);
 int		builtin_env(char **m);
 int		builtin_export(t_cmd_set *p, char **args);

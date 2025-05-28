@@ -12,6 +12,8 @@
 
 #include "../inc/minishell.h"
 
+/* If minishell is launched without environement variables, set basic one
+for minimal execution of the minishell.*/
 static int	allocate_env_vars_if_envp_empty(t_cmd_set *p)
 {
 	size_t	i;
@@ -34,6 +36,10 @@ static int	allocate_env_vars_if_envp_empty(t_cmd_set *p)
 	return (1);
 }
 
+/* Global initialisation of minishell.
+Initalise a t_cmd_set and the global exit status variable.
+If env exist and not empty, cuplicate it in envp, if not
+use helper function for basic env variable.*/
 static void	init_reset(t_cmd_set *p, char **envp)
 {
 	p->cmds = NULL;
@@ -62,6 +68,11 @@ static void	init_reset(t_cmd_set *p, char **envp)
 	}
 }
 
+/* Main minishell initializer :
+Security if init_rest failed get a minimal path 
+get a correct cwd : $PWD.
+set $SHLV : reset it to 1 if not a valid value
+otherwise increment it by 1.*/
 void	init(t_cmd_set *p, char **envp, char **argv, int argc)
 {
 	char	*path;

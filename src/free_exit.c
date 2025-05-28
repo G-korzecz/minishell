@@ -12,6 +12,11 @@
 
 #include "../inc/minishell.h"
 
+/* Exit and cleaning function. Can print something if needed.
+Free everything that is allocated in the main struct :
+- p->envp as an **array
+- p->cmd as a command list (see lst_clear)
+- p->input_text as a *char.*/
 void	free_exit(t_cmd_set *p, int exit_code, char *msg)
 {
 	if (msg)

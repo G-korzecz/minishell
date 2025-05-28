@@ -12,6 +12,11 @@
 
 #include "../inc/minishell.h"
 
+/*Unset with no arugment do nothing
+loops through argument.
+Append '=' to the name of a variable if not present.
+VAR is replace with VAR=
+if found use array_replace to shift everything*/
 int	builtin_unset(t_cmd_set *p, char **args)
 {
 	int		i;

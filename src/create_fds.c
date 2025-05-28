@@ -12,6 +12,10 @@
 
 #include "../inc/minishell.h"
 
+/* Main fd helper :
+Uses flags to return the correct fd in function of the token found.
+Use access() to check if the file to open have the right permissions
+Central error messaging.*/
 int	get_fd(int oldfd, char *path, int flags[2], t_cmd_set *p)
 {
 	int	fd;
@@ -37,6 +41,16 @@ int	get_fd(int oldfd, char *path, int flags[2], t_cmd_set *p)
 	return (fd);
 }
 
+/* Handles '>' (overwrite)
+goes to :
+else if (flags[0])
+	fd = open(path, O_CREAT | O_WRONLY | O_TRUNC, 0664);
+Missing file, get error_token_newline
+Else error is printed in get_fed and status code is set to 1.
+Btw if error *i = -1 trigger :
+if (i < 0)
+			return (free_tmp_lst(cmds[0], args, temp[1]));
+in parse_cmd to stop parsing.*/
 t_cmd	*out_fd_truncate(t_cmd *node, char **args, int *i, t_cmd_set *p)
 {
 	int	flags[2];
@@ -60,6 +74,13 @@ t_cmd	*out_fd_truncate(t_cmd *node, char **args, int *i, t_cmd_set *p)
 	return (node);
 }
 
+/* Handles '>>' (append)
+goes to :
+if (flags[0] && flags[1])
+	fd = open(path, O_CREAT | O_WRONLY | O_APPEND, 0664);
+note that we skip second '>' : args[++(*i)
+Same error handling as before.
+*/
 t_cmd	*out_fd_append(t_cmd *node, char **args, int *i, t_cmd_set *p)
 {
 	int	flags[2];
@@ -83,6 +104,11 @@ t_cmd	*out_fd_append(t_cmd *node, char **args, int *i, t_cmd_set *p)
 	return (node);
 }
 
+/* handles '<' (input redirection) 
+goes to :
+else
+	fd = open(path, O_RDONLY);
+if file doesnt exist, continue parsing (doesnt set *i = -1)*/
 t_cmd	*in_fd_read(t_cmd *node, char **args, int *i, t_cmd_set *p)
 {
 	int	flags[2];

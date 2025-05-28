@@ -12,12 +12,13 @@
 
 #include "../inc/minishell.h"
 
-/* Generate the current working directory via getcwd
+/* Generate the current working directory via getcwd, print it in bold.
 If getcwd fail, put root instead "/" so the program can continue.
 Append "$ " at the end. */
 static char	*generate_prompt(void)
 {
 	char	*cwd;
+	char	*colorcwd;
 	char	*prompt;
 
 	cwd = getcwd(NULL, 0);
@@ -25,16 +26,22 @@ static char	*generate_prompt(void)
 		cwd = ft_strdup("/");
 	if (cwd == NULL)
 		return (NULL);
-	prompt = ft_strjoin(cwd, "$ ");
+	colorcwd = ft_strjoin("\001\033[1;34m\002", cwd);
+	if (colorcwd == NULL)
+		return (free(cwd), NULL);
+	prompt = ft_strjoin(colorcwd, "\001\033[0m\002$ ");
 	if (prompt == NULL)
+	{
+		free_all(cwd, colorcwd, NULL, NULL);
 		return (NULL);
-	free(cwd);
+	}
+	free_all(cwd, colorcwd, NULL, NULL);
 	return (prompt);
 }
 
 /* Normal case for Minishell :
 use readline to get user input (readline handle arrow keys, history, tab...)
-prompt is current working directory. */
+prompt is current working directory -> p->input_text.*/
 static void	handle_interactive_input(t_cmd_set *p)
 {
 	char	*prompt;
@@ -74,19 +81,19 @@ isatty(0) = Is standard input connected to a terminal?
 if yes, interactive mode, if not, non-interactive mode. */
 int	main(int argc, char **argv, char **envp)
 {
-	t_cmd_set	p;
+	t_cmd_set	p_cmd_set;
 
-	init(&p, envp, argv, argc);
+	init(&p_cmd_set, envp, argv, argc);
 	while (true)
 	{
 		disable_ctrl_z();
-		set_signals(&p);
+		set_signals(&p_cmd_set);
 		if (isatty(0))
-			handle_interactive_input(&p);
+			handle_interactive_input(&p_cmd_set);
 		else
-			handle_non_interactive_input(&p);
-		if (!process_input(p.input_text, &p))
+			handle_non_interactive_input(&p_cmd_set);
+		if (!process_input(p_cmd_set.input_text, &p_cmd_set))
 			break ;
 	}
-	free_exit(&p, p.status_code, NULL);
+	free_exit(&p_cmd_set, p_cmd_set.status_code, NULL);
 }

@@ -12,32 +12,55 @@
 
 #include "../inc/minishell.h"
 
-void	ft_chdir(char ***av, char *home, char *oldpwd, t_cmd_set *p)
+/* Checks errors for the cd argument when not a directory.
+If the path does not exist, prints "No such file or directory".
+If the path exists but is not a directory, prints "Not a directory".
+If the path exists and is a directory but cannot be entered,
+prints "Permission denied".*/
+static void	cd_path_checks(char *path, t_cmd_set *p)
+{
+	struct stat	st;
+
+	if (access(path, F_OK) == -1)
+		put_err_cd("NoFile_NoDir", path, 1, p);
+	else if (stat(path, &st) != -1 && !S_ISDIR(st.st_mode))
+		put_err_cd("Not_Directory", path, 1, p);
+	else if (access(path, X_OK) == -1)
+		put_err_cd("Perm_Denied", path, 1, p);
+}
+
+/* Core logic for the "cd" builtin, handles all argument cases.
+If HOME is unset and no argument or '~', prints error.
+If no argument or '~', changes directory to HOME.
+If argument is '-', changes to OLDPWD.
+If argument exists but is not a directory, calls cd_path_checks.
+If argument is a directory, changes to it.*/
+static void	ft_chdir(char ***av, char *home, char *oldpwd, t_cmd_set *p)
 {
 	DIR	*dir;
 
 	dir = NULL;
 	if (av[0][1])
 		dir = opendir(av[0][1]);
-	if (home && !home[0] && !dir)
-		put_err_cd("HOME_Not_Set", NULL, 1, p);
-	else if (home && (!av[0][1] || (av[0][1][0] == '~')))
-		p->status_code = chdir(home) == -1;
-	else if (oldpwd && av[0][1] && av[0][1][0] == '-')
-		p->status_code = chdir(oldpwd) == -1;
-	else if (av[0][1] && access(av[0][1], F_OK) != -1
-		&& access(av[0][1], X_OK) == -1)
-		put_err_cd("Perm_Denied", av[0][1], 1, p);
-	else if (av[0][1] && dir && access(av[0][1], X_OK) == 0)
+	if (!home || !home[0])
+	{
+		if ((!av[0][1] || av[0][1][0] == '~') && !dir)
+			put_err_cd("HOME_Not_Set", NULL, 1, p);
+	}
+	else if (!av[0][1] || av[0][1][0] == '~')
+		p->status_code = (chdir(home) == -1);
+	else if (av[0][1][0] == '-' && oldpwd && *oldpwd)
+		p->status_code = (chdir(oldpwd) == -1);
+	else if (!dir)
+		cd_path_checks(av[0][1], p);
+	else
 		chdir(av[0][1]);
-	else if (av[0][1] && access(av[0][1], F_OK) == -1)
-		put_err_cd("NoFile_NoDir", av[0][1], 1, p);
-	else if (av[0][1])
-		put_err_cd("NoFile_NoDir", av[0][1], 1, p);
 	if (dir)
 		closedir(dir);
 }
 
+/* Done for setting env variable PWD and OLDPWD if they dont
+already exist.*/
 void	check_home_pwd_oldpwd(t_cmd_set *p)
 {
 	char	*pwd;
@@ -54,6 +77,7 @@ void	check_home_pwd_oldpwd(t_cmd_set *p)
 	free_all(pwd, oldpwd, cwd, NULL);
 }
 
+/* Update variables of OLDPWD/PWD.*/
 static void	update_pwd_vars(t_cmd_set *p, char *prevpwd)
 {
 	char	*curpwd;
@@ -66,6 +90,10 @@ static void	update_pwd_vars(t_cmd_set *p, char *prevpwd)
 	free_all(curpwd, NULL, NULL, NULL);
 }
 
+/* Check for numbers of arguments, if arg[2] exit : fail
+Set HOME/PWD/OLDPWD/prevpwd for later usage.
+ft_chdir : main logic of cd.
+"cd -" printage is handled here !*/
 int	builtin_cd(t_cmd_set *p, char **cmd_args)
 {
 	char	*home;
@@ -77,8 +105,6 @@ int	builtin_cd(t_cmd_set *p, char **cmd_args)
 		return (put_err(NULL, "cd: too many arguments", 1, p), 1);
 	check_home_pwd_oldpwd(p);
 	home = ft_getenv("HOME", p->envp);
-	if (!home)
-		home = ft_strdup("");
 	oldpwd = ft_getenv("OLDPWD", p->envp);
 	if (!oldpwd)
 		oldpwd = ft_strdup("");

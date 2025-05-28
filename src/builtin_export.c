@@ -12,6 +12,10 @@
 
 #include "../inc/minishell.h"
 
+/* Check for a viable of name arg, update the index of the var if found
+if found and has a value (= sign) return 1
+-1 if no value
+0 if not found.*/
 static int	var_in_envp(char *arg, char **envp, int *idx)
 {
 	int	pos;
@@ -29,28 +33,37 @@ static int	var_in_envp(char *arg, char **envp, int *idx)
 	return (0);
 }
 
+/* Check for the name of the variable :
+invalid :
+Empty string.
+Starts with digit or =.
+Any character before = is not alphanumeric or underscore.*/
 static int	is_valid_identifier(char *str)
 {
-	int		i;
-	char	*err_msg;
+	int	pos;
 
-	err_msg = "mini: export: not a valid identifier\n";
-	if (!str || str[0] == '=')
-		return (ft_printf_fd(2, "%s", err_msg), 0);
-	if (ft_isdigit(str[0]) || str[0] == '+')
-		return (ft_printf_fd(2, "%s", err_msg), 0);
-	i = 0;
-	while (str[i] && str[i] != '=' && str[i] != '_')
+	if (!str || str[0] == '\0')
+		return (ft_printf_fd(2,
+				"mini: export: `%s': not a valid identifier\n",
+				str), 0);
+	if (ft_isdigit(str[0]) || str[0] == '=')
+		return (ft_printf_fd(2,
+				"mini: export: `%s': not a valid identifier\n",
+				str), 0);
+	pos = 0;
+	while (str[pos] && str[pos] != '=')
 	{
-		if (!ft_isalnum(str[i]))
-		{
-			return (ft_printf_fd(2, "%s", err_msg), 0);
-		}
-		i++;
+		if (!ft_isalnum(str[pos]) && str[pos] != '_')
+			return (ft_printf_fd(2,
+					"mini: export: `%s': not a valid identifier\n", str), 0);
+		pos++;
 	}
 	return (1);
 }
 
+/* Sorts the environment variable array alphabetically, 
+so export prints in order. 
+Bubble sorting FTW !*/
 static void	sort_env(char **arr, int len)
 {
 	int		i;
@@ -75,6 +88,10 @@ static void	sort_env(char **arr, int len)
 	}
 }
 
+/* Print all variable in the model :
+declare -x VAR="value".
+declare -x VAR (if no =)
+Skip _= variable.*/
 static void	print_export(char **envp)
 {
 	int		i;
@@ -103,6 +120,12 @@ static void	print_export(char **envp)
 	}
 }
 
+/* If no argument, print_export
+Loops through all aguments :
+Check for valid identifier
+check if already exit via var_in_envp
+if found duplicate and store it at the same place (free before)
+if not found, append it at the end via ft_array_insert.*/
 int	builtin_export(t_cmd_set *p, char **args)
 {
 	int	i;

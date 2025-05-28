@@ -12,6 +12,8 @@
 
 #include "../inc/minishell.h"
 
+/* Returns the number of elements (rows) in a NULL-terminated string array m.
+If m is NULL, returns 0. */
 int	ft_arr_len(char **m)
 {
 	int	i;
@@ -24,6 +26,9 @@ int	ft_arr_len(char **m)
 	return (i);
 }
 
+/* Creates a copy of a NULL-terminated string array arr_ptr.
+Allocates new memory for each string and for the array itself.
+Basically strdup for **str.*/
 char	**ft_dup_array(char **arr_ptr)
 {
 	char	**arr_copy;
@@ -49,6 +54,9 @@ char	**ft_dup_array(char **arr_ptr)
 	return (arr_copy);
 }
 
+/* Returns a new array with newstr appended to the input array in.
+Frees the original array in. If newstr is NULL, returns in unchanged.
+Use for append to env.*/
 char	**ft_array_insert(char **in, char *newstr)
 {
 	char	**out;
@@ -78,6 +86,10 @@ char	**ft_array_insert(char **in, char *newstr)
 	return (out);
 }
 
+/* Replaces the n-th string of the array *big with the strings from array small.
+Allocates a new array, inserts all elements of small at position n,
+copies other elements from *big, and frees the old array.
+Returns the new array, or NULL on error. */
 char	**ft_array_replace(char ***big, char **small, int n)
 {
 	char	**tmpstr;

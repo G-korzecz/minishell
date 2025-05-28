@@ -30,3 +30,9 @@ void	error_token_newline(void)
 	ft_printf_fd(2, "mini: ");
 	ft_printf_fd(2, "syntax error near unexpected token `newline'\n");
 }
+
+void	error_delim_heredoc(char *lim)
+{
+	ft_printf_fd(2, "mini: warning: here-document delimited by end-of-file ");
+	ft_printf_fd(2, "(wanted `%s\')\n", lim);
+}
