@@ -108,7 +108,7 @@ t_cmd	*out_fd_append(t_cmd *node, char **args, int *i, t_cmd_set *p)
 goes to :
 else
 	fd = open(path, O_RDONLY);
-if file doesnt exist, continue parsing (doesnt set *i = -1)*/
+Exact same error handling as before.*/
 t_cmd	*in_fd_read(t_cmd *node, char **args, int *i, t_cmd_set *p)
 {
 	int	flags[2];
@@ -120,15 +120,14 @@ t_cmd	*in_fd_read(t_cmd *node, char **args, int *i, t_cmd_set *p)
 		node->in_fd = get_fd(node->in_fd, args[*i], flags, p);
 	if (!args[*i] || node->in_fd == -1)
 	{
+		*i = -1;
 		if (node->in_fd != -1)
 		{
 			error_token_newline();
 			p->status_code = 2;
 		}
-		if (p && p->cmds && ft_lstsize(p->cmds) != 1)
-			p->status_code = 0;
 		else
-			(*i)--;
+			p->status_code = 1;
 	}
 	return (node);
 }

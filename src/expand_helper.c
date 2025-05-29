@@ -12,14 +12,6 @@
 
 #include "../inc/minishell.h"
 
-/*Helper that ensures tilde expansion only happens when ~ 
-is at the start of a standalone word.*/
-int	is_delim(char c)
-{
-	return (c == ' ' || c == '\t' || c == ':' || c == '='
-		|| c == '/' || c == '\0');
-}
-
 /*Make sure $ before quotes is only removed if it's not inside other quotes.*/
 void	track_quotes(int *in_squote, int *in_dquote, char c)
 {

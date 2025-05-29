@@ -12,6 +12,13 @@
 
 #include "../inc/minishell.h"
 
+/* Helper for freeing input whn encounter unclosed quotes. */
+static void	handle_uquote(char **s, t_cmd_set *p)
+{
+	put_err("Unclosed_Quote", NULL, 2, p);
+	free_all(*s, NULL, NULL, NULL);
+}
+
 /* Checks if a string has unclosed single or double quotes
 that are not respectivly themselves into double/single quotes
 Returns 1 if unclosed, 0 otherwise. */
@@ -55,7 +62,7 @@ void	*process_input(char *input, t_cmd_set *p)
 	handle_input(&input, i, quotes, p);
 	if (check_unclosed_quotes(input))
 	{
-		put_err("Unclosed_Quote", NULL, 2, p);
+		handle_uquote(&input, p);
 		return (p);
 	}
 	a = split_and_ignore_space_if_in_quote(input, " ");

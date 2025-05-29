@@ -132,21 +132,9 @@ void	find_cmd_path(t_cmd_set *p, t_list *cmd, char **s, char *path)
 
 	n = cmd->content;
 	path = ft_getenv("PATH", p->envp);
-	if (!path || !*path)
-		path = ft_strdup("/");
+	path = ensure_path(path);
 	dir = cmd_checks(cmd, &s, path, p);
-	if (!is_builtin(n) && n && n->args && dir && (n->args[0][0]
-		&& !ft_strchr("/.~", n->args[0][0])))
-		put_err(NULL, "command not found", 127, p);
-	else if (!is_builtin(n) && n && n->args && dir && n->args[0][0]
-			&& (ft_strchr("/.~", n->args[0][0])))
-		put_err("Is_Directory", *n->args, 126, p);
-	else if (!is_builtin(n) && n && n->cmd_path
-		&& access(n->cmd_path, F_OK) == -1)
-		put_err("NoFile_NoDir", n->cmd_path, 127, p);
-	else if (!is_builtin(n) && n && n->cmd_path
-		&& access(n->cmd_path, X_OK) == -1)
-		put_err("Perm_Denied", n->cmd_path, 126, p);
+	handle_exec_err(n, dir, p);
 	if (dir)
 		closedir(dir);
 	if (cmd->next != NULL)

@@ -69,7 +69,7 @@ void	builtin_exit(t_list *cmd, t_cmd_set *p)
 
 	is_exit = 0;
 	args = ((t_cmd *)cmd->content)->args;
-	/*ft_putendl_fd("exit", 1);*/
+	ft_putendl_fd("exit", 1);
 	if (!args || !args[1])
 		free_exit(p, 0, NULL);
 	if (!parse_strict_ll(args[1], &status))

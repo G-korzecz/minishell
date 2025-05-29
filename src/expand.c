@@ -12,28 +12,6 @@
 
 #include "../inc/minishell.h"
 
-/* Expand the '~' special variable as HOME.
-Get what comes before (left) and after (right) append to both end of HOME
-i is the index of tilde.*/
-char	*tilde_expander(char *str, size_t i, t_cmd_set *p)
-{
-	char	*home;
-	char	*res;
-	char	*left;
-	char	*right;
-	char	*tmp;
-
-	home = ft_getenv("HOME", p->envp);
-	if (!home)
-		home = ft_strdup("");
-	left = ft_substr(str, 0, i);
-	right = ft_strdup(str + i + 1);
-	tmp = ft_strjoin(left, home);
-	res = ft_strjoin(tmp, right);
-	free_all(left, right, tmp, str);
-	return (res);
-}
-
 /* Find both exit status for $? or variable value ($USER, $HOME....)
 if variable doesnt exist, return ""*/
 char	*find_substitution(char first, char *var, t_cmd_set *p)
@@ -91,7 +69,6 @@ char	*expand_variable(char *str, int i, t_cmd_set *p, char *s[3])
 /* Main recursive loop for expanding var, first remove useless $ before quotes
 quotes[0] : inside single quote
 quotes[1] : inside double quote
-tilde_expander for HOME (only if not in singe/double quotes)
 then if it finds $ that is followed by a valid var, the recursion begin
 until there is nor more variable to expand.*/
 char	*var_expander(char *str, int quotes[2], t_cmd_set *p)
@@ -105,13 +82,7 @@ char	*var_expander(char *str, int quotes[2], t_cmd_set *p)
 	{
 		quotes[0] = (quotes[0] + (!quotes[1] && str[i] == '\'')) % 2;
 		quotes[1] = (quotes[1] + (!quotes[0] && str[i] == '\"')) % 2;
-		if (!quotes[0] && !quotes[1] && str[i] == '~'
-			&& (i == 0 || is_delim(str[i - 1])))
-		{
-			str = tilde_expander(str, i, p);
-			i = -1;
-		}
-		else if (!quotes[0] && str[i] == '$' && str[i + 1]
+		if (!quotes[0] && str[i] == '$' && str[i + 1]
 			&& (ft_isalpha(str[i + 1])
 				|| str[i + 1] == '_' || str[i + 1] == '?'))
 			return (var_expander(

@@ -32,7 +32,7 @@ void	free_lst(void *content)
 
 /* Frees a NULL-terminated array of strings and sets pointer to NULL.
 Takes a triple pointer to free both the content and container. */
-void	free_array(char ***m)
+/*void	free_array(char ***m)
 {
 	int	i;
 
@@ -53,6 +53,23 @@ void	free_array(char ***m)
 		free(m[0]);
 		*m = NULL;
 	}
+}*/
+
+void	free_array(char ***m)
+{
+	int	i;
+
+	if (!m || !*m)
+		return ;
+	i = 0;
+	while ((*m)[i])
+	{
+		free((*m)[i]);
+		(*m)[i] = NULL;
+		i++;
+	}
+	free(*m);
+	*m = NULL;
 }
 
 /* Frees up to four strings passed as parameters.

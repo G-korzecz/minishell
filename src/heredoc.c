@@ -108,10 +108,10 @@ Signal handling for SIGINT, ignore ctr + \ in heredoc.
 if delimiter is quoted, expand = 1, 0 else.
 When writing done, close fd
 If aborted by ctrl + c -> close rear-end.*/
-int read_heredoc(char *str[3], char *lim, t_cmd_set *p)
+int	read_heredoc(char *str[3], char *lim, t_cmd_set *p)
 {
-	int fd[2];
-	int expand;
+	int	fd[2];
+	int	expand;
 
 	expand = 1;
 	signal(SIGINT, signals_heredoc);
@@ -137,10 +137,10 @@ read-end file descriptor in node->in_fd.
 If no limiter or an error, aborts parsing by setting *i = -1
 and, on syntax error, prints an unexpected newline token message.
 Returns the modified node for chaining in the parser.*/
-t_cmd *in_fd_heredoc(t_cmd *node, char **args, int *i, t_cmd_set *p)
+t_cmd	*in_fd_heredoc(t_cmd *node, char **args, int *i, t_cmd_set *p)
 {
-	char *str[3];
-	char *lim;
+	char	*str[3];
+	char	*lim;
 
 	str[0] = NULL;
 	str[1] = NULL;
