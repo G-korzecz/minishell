@@ -53,7 +53,9 @@ static void	handle_interactive_input(t_cmd_set *p)
 	free(prompt);
 	if (p->input_text == NULL)
 	{
-		ft_printf_fd(1, "exit\n");
+		ft_putendl_fd("\033[1;31mexit\033[0m", 1);
+		if (g_exit_status < 0)
+			g_exit_status = 0;
 		free_exit(p, g_exit_status, NULL);
 	}
 }

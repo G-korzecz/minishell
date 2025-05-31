@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: gkorzecz <gkorzec@student.42.fr>           +#+  +:+       +#+         #
+#    By: cwang <cwang@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 18:50:02 by gkorzecz          #+#    #+#              #
-#    Updated: 2025/04/28 22:30:49 by gkorzecz         ###   ########.fr        #
+#    Updated: 2025/05/29 12:33:11 by cwang            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,9 +31,33 @@ GET_NEXT_LINE		= $(GET_NEXT_LINE_DIR)$(GET_NEXT_LINE_NAME)
 
 SRC_DIR_F		= src
 OBJ_DIR		= obj
+OBJ_SUBDIRS = $(sort $(dir $(OBJ_FILES)))
+#####
+PARS			=	src/parsing/
+EXEC			=	src/execution/
+BI				=	src/built-ins/
+SGE				=	src/signals_and_errors/
+UTI				=	src/utils/
 
-SRC_FILES	= $(wildcard $(SRC_DIR_F)/*.c)
-OBJ_FILES	= $(patsubst $(SRC_DIR_F)/%.c, $(OBJ_DIR)/%.o, $(SRC_FILES))
+SRC_FILES	=      $(PARS)heredoc.c $(PARS)parse_nodes.c $(PARS)process_input_helper.c \
+					$(PARS)parse_split_cmd.c $(PARS)process_input.c $(PARS)split_with_space.c \
+					 $(PARS)syntax_checker.c $(PARS)trim_quotes.c $(PARS)expand.c \
+					 $(PARS)expand_helper.c $(PARS)create_fds.c \
+					$(BI)builtin_cd.c  $(BI)builtin_checker.c $(BI)builtin_echo.c\
+					$(BI)builtin_env.c  $(BI)builtin_exit.c $(BI)builtin_export.c\
+					$(BI)builtin_pwd.c  $(BI)builtin_unset.c $(BI)environement.c\
+					$(EXEC)execute.c $(EXEC)find_path.c $(EXEC)exe_builtin.c\
+					$(EXEC)find_path_helper.c\
+					$(SGE)handle_errors.c $(SGE)handle_errors_helper.c $(SGE)handle_signals.c\
+					$(UTI)free_exit.c $(UTI)utils.c $(UTI)utils_array.c\
+					$(UTI)utils_free.c \
+					$(SRC_DIR_F)/init.c $(SRC_DIR_F)/main.c
+
+OBJ_FILES = $(SRC_FILES:$(SRC_DIR_F)/%.c=$(OBJ_DIR)/%.o)
+
+######
+#SRC_FILES	= $(wildcard $(SRC_DIR_F)/*.c)
+#OBJ_FILES	= $(patsubst $(SRC_DIR_F)/%.c, $(OBJ_DIR)/%.o, $(SRC_FILES))
 
 NAME		= minishell
 CC			= cc
@@ -45,7 +69,7 @@ INCLUDE		= 	-I ./inc/\
 				-I ./ft_printf_fd/\
 				-I ./get_next_line/
 
-all:		$(LIBFT) $(FT_PRINTF_FD) $(GET_NEXT_LINE) $(OBJ_DIR) $(NAME)
+all: $(LIBFT) $(FT_PRINTF_FD) $(GET_NEXT_LINE) $(OBJ_SUBDIRS) $(NAME)
 
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
@@ -54,6 +78,9 @@ $(OBJ_DIR)/%.o: $(SRC_DIR_F)/%.c
 	@echo "$(YELLOW)Compiling $<...$(RESET)"
 	@$(CC) $(FLAGS) $(INCLUDE) -c $< -o $@
 
+$(OBJ_SUBDIRS):
+	@mkdir -p $@
+	
 $(LIBFT):
 	@echo "$(YELLOW)Compiling libft...$(RESET)"
 	@make bonus --no-print-directory -sC $(LIBFT_DIR)

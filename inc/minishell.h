@@ -114,6 +114,7 @@ void	free_lst(void *content);
 void	free_all(char *s1, char *s2, char *s3, char *s4);
 void	free_array(char ***m);
 t_list	*free_tmp_lst(t_list *cmds, char **args, char **temp);
+void	close_fds_except_std(void);
 
 /* Initialisation */
 
